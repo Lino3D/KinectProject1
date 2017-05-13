@@ -6,16 +6,16 @@ namespace KinectProject.Windows
 {
     public class CustomWindow : GameWindow
     {
-        protected Vector3 Eye = Configuration.DefaultEyePosition;
-        protected Vector3 Target = Configuration.DefaultTargetPosition;
-        protected Vector3 Up = Configuration.DefaultUpVetor;
+        protected Vector3 Eye = Constants.Constants.DefaultEyePosition;
+        protected Vector3 Target = Constants.Constants.DefaultTargetPosition;
+        protected Vector3 Up = Constants.Constants.DefaultUpVetor;
         private bool _mouseCaptured;
-        private double _phi = Configuration.DefaultPhiAngle;
+        private double _phi = Constants.Constants.DefaultPhiAngle;
         private int _prevX;
         private int _prevY;
         protected Matrix4 Projection;
-        private double _radius = Configuration.DefaultRadius;
-        private double _theta = Configuration.DefaultThetaAngle;
+        private double _radius = Constants.Constants.DefaultRadius;
+        private double _theta = Constants.Constants.DefaultThetaAngle;
 
         public CustomWindow(int width, int height) : base(width, height)
         {
@@ -28,7 +28,7 @@ namespace KinectProject.Windows
 
         private void OnMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            _radius -= e.Delta*Configuration.WheelStep;
+            _radius -= e.Delta*Constants.Constants.WheelStep;
         }
 
         private void OnUpdateFrame(object sender, FrameEventArgs e)
@@ -44,8 +44,8 @@ namespace KinectProject.Windows
                 return;
             var dx = e.X - _prevX;
             var dy = e.Y - _prevY;
-            _theta += -dx*Configuration.RotateAngleStep;
-            _phi += dy*Configuration.RotateAngleStep;
+            _theta += -dx*Constants.Constants.RotateAngleStep;
+            _phi += dy*Constants.Constants.RotateAngleStep;
             _prevX = e.X;
             _prevY = e.Y;
         }
@@ -68,9 +68,9 @@ namespace KinectProject.Windows
 
         public void ResetEye()
         {
-            _phi = Configuration.DefaultPhiAngle;
-            _theta = Configuration.DefaultThetaAngle;
-            _radius = Configuration.DefaultRadius;
+            _phi = Constants.Constants.DefaultPhiAngle;
+            _theta = Constants.Constants.DefaultThetaAngle;
+            _radius = Constants.Constants.DefaultRadius;
         }
     }
 }

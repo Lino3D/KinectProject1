@@ -21,7 +21,7 @@ namespace KinectProject.Windows
         private double[,] _depthMap;
         private List<CubePoint> _depthPoints;
         public static KinectSensor Sensor;
-        private List<Data> _datas = new List<Data>();
+//        private List<Data> _datas = new List<Data>();
         private Cube _fullCube;
         private Cube _scannedItem;
         private Cube _actualPreview;

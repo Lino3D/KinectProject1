@@ -2,15 +2,13 @@
 using KinectProject.Geometry;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using KinectProject.Constants;
-
 namespace KinectProject
 {
     public static class Extensions
     {
-        static Vector3 _shift = new Vector3( -Constants.HalfCubeWidth,
-                        -Constants.HalfCubeHeight,
-                        Constants.DistanceToCube);
+        static Vector3 _shift = new Vector3( -Constants.Constants.HalfCubeWidth,
+                        -Constants.Constants.HalfCubeHeight,
+                        Constants.Constants.DistanceToCube);
  
 
         public static void DrawWithShift(this CubePoint cubePoint)
@@ -41,28 +39,28 @@ namespace KinectProject
 
         public static bool InCube(this CubePoint p)
         {
-            return p.X >= 0 && p.X <= Constants.CubeWidth &&
-                   p.Y >= 0 && p.Y <= Constants.CubeHeight &&
-                   p.Z >= 0 && p.Z <= Constants.CubeDepth;
+            return p.X >= 0 && p.X <=  Constants.Constants.CubeWidth &&
+                   p.Y >= 0 && p.Y <= Constants.Constants.CubeHeight &&
+                   p.Z >= 0 && p.Z <= Constants.Constants.CubeDepth;
         }
 
         public static bool InCubeWithoutDepth(this CubePoint p)
         {
-            return p.X >= 0 && p.X <= Constants.CubeWidth &&
-                   p.Y >= 0 && p.Y <= Constants.CubeHeight;
+            return p.X >= 0 && p.X <= Constants.Constants.CubeWidth &&
+                   p.Y >= 0 && p.Y <= Constants.Constants.CubeHeight;
         }
 
         public static bool InCube(double x, double y, double z)
         {
-            return x >= 0 && x < Constants.CubeWidth &&
-                   y >= 0 && y < Constants.CubeHeight &&
-                   z >= 0 && z < Constants.CubeDepth;
+            return x >= 0 && x < Constants.Constants.CubeWidth &&
+                   y >= 0 && y < Constants.Constants.CubeHeight &&
+                   z >= 0 && z < Constants.Constants.CubeDepth;
         }
 
         public static bool InCubeWithoutDepth(int x, int y)
         {
-            return x >= 0 && x < Constants.CubeWidth &&
-                   y >= 0 && y < Constants.CubeHeight;
+            return x >= 0 && x < Constants.Constants.CubeWidth &&
+                   y >= 0 && y < Constants.Constants.CubeHeight;
         }
 
         public static void DrawBox()
@@ -70,41 +68,41 @@ namespace KinectProject
             GL.Color3(Color.Red);
 
             GL.Begin(PrimitiveType.Lines);
-            GL.Vertex3(Constants.CubeCorners[0]);
-            GL.Vertex3(Constants.CubeCorners[1]);
+            GL.Vertex3(Constants.Constants.CubeCorners[0]);
+            GL.Vertex3(Constants.Constants.CubeCorners[1]);
 
-            GL.Vertex3(Constants.CubeCorners[0]);
-            GL.Vertex3(Constants.CubeCorners[3]);
+            GL.Vertex3(Constants.Constants.CubeCorners[0]);
+            GL.Vertex3(Constants.Constants.CubeCorners[3]);
 
-            GL.Vertex3(Constants.CubeCorners[0]);
-            GL.Vertex3(Constants.CubeCorners[4]);
+            GL.Vertex3(Constants.Constants.CubeCorners[0]);
+            GL.Vertex3(Constants.Constants.CubeCorners[4]);
 
-            GL.Vertex3(Constants.CubeCorners[1]);
-            GL.Vertex3(Constants.CubeCorners[2]);
+            GL.Vertex3(Constants.Constants.CubeCorners[1]);
+            GL.Vertex3(Constants.Constants.CubeCorners[2]);
 
-            GL.Vertex3(Constants.CubeCorners[1]);
-            GL.Vertex3(Constants.CubeCorners[5]);
+            GL.Vertex3(Constants.Constants.CubeCorners[1]);
+            GL.Vertex3(Constants.Constants.CubeCorners[5]);
 
-            GL.Vertex3(Constants.CubeCorners[2]);
-            GL.Vertex3(Constants.CubeCorners[3]);
+            GL.Vertex3(Constants.Constants.CubeCorners[2]);
+            GL.Vertex3(Constants.Constants.CubeCorners[3]);
 
-            GL.Vertex3(Constants.CubeCorners[2]);
-            GL.Vertex3(Constants.CubeCorners[6]);
+            GL.Vertex3(Constants.Constants.CubeCorners[2]);
+            GL.Vertex3(Constants.Constants.CubeCorners[6]);
 
-            GL.Vertex3(Constants.CubeCorners[3]);
-            GL.Vertex3(Constants.CubeCorners[7]);
+            GL.Vertex3(Constants.Constants.CubeCorners[3]);
+            GL.Vertex3(Constants.Constants.CubeCorners[7]);
 
-            GL.Vertex3(Constants.CubeCorners[4]);
-            GL.Vertex3(Constants.CubeCorners[5]);
+            GL.Vertex3(Constants.Constants.CubeCorners[4]);
+            GL.Vertex3(Constants.Constants.CubeCorners[5]);
 
-            GL.Vertex3(Constants.CubeCorners[4]);
-            GL.Vertex3(Constants.CubeCorners[7]);
+            GL.Vertex3(Constants.Constants.CubeCorners[4]);
+            GL.Vertex3(Constants.Constants.CubeCorners[7]);
 
-            GL.Vertex3(Constants.CubeCorners[5]);
-            GL.Vertex3(Constants.CubeCorners[6]);
+            GL.Vertex3(Constants.Constants.CubeCorners[5]);
+            GL.Vertex3(Constants.Constants.CubeCorners[6]);
 
-            GL.Vertex3(Constants.CubeCorners[6]);
-            GL.Vertex3(Constants.CubeCorners[7]);
+            GL.Vertex3(Constants.Constants.CubeCorners[6]);
+            GL.Vertex3(Constants.Constants.CubeCorners[7]);
             GL.End();
         }
 
@@ -123,7 +121,7 @@ namespace KinectProject
                         var vertex = actualCube.Vertices[x, y, z];
                         if (drawAll ||
                             (
-                                (Constants.ShowPointsOutsideBox || vertex.InCube()) 
+                                (Constants.Constants.ShowPointsOutsideBox || vertex.InCube()) 
                                 && vertex.Value 
                                 && ShouldDrawThisVertex(x, y, z)
                             )
@@ -137,9 +135,9 @@ namespace KinectProject
 
         public static bool ShouldDrawThisVertex(int x, int y, int z)
         {
-            return x % Constants.Skip == 0
-                && y % Constants.Skip == 0
-                && z % Constants.Skip == 0;
+            return x % Constants.Constants.Skip == 0
+                && y % Constants.Constants.Skip == 0
+                && z % Constants.Constants.Skip == 0;
         }
 
         public static float[,,] ToVoxels(this CubePoint[,,] vertices)
