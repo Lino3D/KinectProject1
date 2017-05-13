@@ -16,7 +16,7 @@ namespace KinectProject
             {
                 _depthWindow = depthWindow;
                 //_depthWindow.SnapshotMade += DepthWindowOnSnapshotMade;
-                _depthWindow.Title = "Kinect Scanner 3D - scanning";
+                _depthWindow.Title = "Kinect Project";
                 _depthWindow.Run(30.0, 0.0);
             }
         }

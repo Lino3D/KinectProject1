@@ -85,12 +85,7 @@ namespace KinectProject.Windows
             {
                // MakeSnapshot();
             }
-
-            if (e.Key == Key.R)
-            {
-                ResetEye();
-                ResetPreview();
-            }
+            
 
             if (e.Key == Key.Left)
             {
@@ -279,7 +274,7 @@ namespace KinectProject.Windows
 
         private void RenderHandler(object sender, FrameEventArgs e)
         {
-            Context.MakeCurrent(WindowInfo);
+        //    Context.MakeCurrent(WindowInfo);
 
             GL.Clear(ClearBufferMask.ColorBufferBit |
                      ClearBufferMask.DepthBufferBit |
@@ -327,7 +322,7 @@ namespace KinectProject.Windows
                 _fullCube.Draw();
             }
 
-            Context.MakeCurrent(WindowInfo);
+         //   Context.MakeCurrent(WindowInfo);
             Context.SwapBuffers();
         }
     }
