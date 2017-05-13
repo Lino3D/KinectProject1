@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenTK;
 
 namespace KinectProject.Geometry
 {
@@ -10,13 +11,7 @@ namespace KinectProject.Geometry
         public bool Value { get; set; }
         public object Clone()
         {
-            return new CubePoint()
-            {
-                X = X,
-                Y = Y,
-                Z= Z,
-                Value = Value
-            };
+            return this.MemberwiseClone();
         }
     }
 }

@@ -33,25 +33,23 @@ namespace KinectProject.Geometry
 
         public object Clone()
         {
-            var xLen = Vertices.GetLength(0);
-            var yLen = Vertices.GetLength(1);
-            var zLen = Vertices.GetLength(2);
-            var newCube = new Cube()
-            {
-                Center = Center,
-                Vertices = (CubePoint[,,]) Vertices.Clone()
-            };
-            for (int x = 0; x < xLen; x++)
-            {
-                for (int y = 0; y < yLen; y++)
-                {
-                    for (int z = 0; z < zLen; z++)
-                    {
-                        newCube.Vertices[x, y, z] = (CubePoint) Vertices[x, y, z].Clone();
-                    }
-                }
-            }
-            return newCube;
+            //            var newCube = new Cube()
+            //            {
+            //                Center = Center,
+            //                Vertices = (CubePoint[,,]) Vertices.Clone()
+            //            };
+            //            for (var x = 0; x < Vertices.GetLength(0); x++)
+            //            {
+            //                for (var y = 0; y < Vertices.GetLength(1); y++)
+            //                {
+            //                    for (var z = 0; z < Vertices.GetLength(2); z++)
+            //                    {
+            //                        newCube.Vertices[x, y, z] = (CubePoint) Vertices[x, y, z].Clone();
+            //                    }
+            //                }
+            //            }
+            //            return newCube;
+            return this.MemberwiseClone();
         }
     }
 }

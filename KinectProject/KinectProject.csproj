@@ -56,7 +56,6 @@
     <Compile Include="Processor\MarchingCubes.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScannerWindow.cs" />
     <Compile Include="Windows\CustomWindow.cs" />
     <Compile Include="Windows\DepthWindow.cs" />
     <Compile Include="Windows\PresentationWindow.cs" />
