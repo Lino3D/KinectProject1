@@ -56,7 +56,7 @@
     <Compile Include="Processor\MarchingCubes.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Windows\DepthWindow.cs" />
+    <Compile Include="Windows\MainWindow.cs" />
     <Compile Include="Windows\WindowStatus.cs" />
   </ItemGroup>
   <ItemGroup>

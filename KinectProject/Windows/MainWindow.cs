@@ -13,7 +13,7 @@ using KinectProject.Processor;
 
 namespace KinectProject.Windows
 {
-    public class DepthWindow : GameWindow
+    public class MainWindow : GameWindow
     {
         private const bool DebugWithoutKinect = true;
 
@@ -26,6 +26,9 @@ namespace KinectProject.Windows
         protected Matrix4 Projection;
         private double _radius = Constants.Constants.DefaultRadius;
         private double _theta = Constants.Constants.DefaultThetaAngle;
+        private bool _mouseCaptured;        
+        private int _prevX;
+        private int _prevY;
 
         private Mesh _mesh = null;
 
@@ -43,13 +46,16 @@ namespace KinectProject.Windows
         readonly int _heightSize = (int)Math.Ceiling(Constants.Constants.CubeHeight);
         readonly int _depthSize = (int)Math.Ceiling(Constants.Constants.CubeDepth);
 
-        public DepthWindow()
+        public MainWindow()
             : base(800, 600)
         {
             this.Load += OnLoad;            
             Resize += ResizeHandler;
             this.UpdateFrame += UpdateHandler;
             this.RenderFrame += RenderHandler;
+            this.MouseDown += OnMouseDown;
+            this.MouseUp += OnMouseUp;
+            this.MouseMove += OnMouseMove;
             this.KeyUp += OnKeyUp;
             this.Context.SwapInterval = 1;
 
@@ -80,7 +86,33 @@ namespace KinectProject.Windows
         }
 
         //public event Program.SnapchotMade SnapshotMade;
+        private void OnMouseMove(object sender, MouseMoveEventArgs e)
+        {
+            if (!_mouseCaptured)
+                return;
+            var dx = e.X - _prevX;
+            var dy = e.Y - _prevY;
+            _theta += -dx * Constants.Constants.RotateAngleStep;
+            _phi += dy * Constants.Constants.RotateAngleStep;
+            _prevX = e.X;
+            _prevY = e.Y;
+        }
 
+        private void OnMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.Button != MouseButton.Left)
+                return;
+            _mouseCaptured = false;
+        }
+
+        private void OnMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.Button != MouseButton.Left)
+                return;
+            _mouseCaptured = true;
+            _prevX = e.X;
+            _prevY = e.Y;
+        }
         private void OnKeyUp(object sender, KeyboardKeyEventArgs e)
         {
             if (e.Key == Key.Escape)
@@ -98,6 +130,10 @@ namespace KinectProject.Windows
                 MakeSnapshot();
             }
             
+            if( e.Key == Key.C)
+            {
+                SwitchDisplayModel();
+            }
 
             if (e.Key == Key.Left)
             {
@@ -369,6 +405,22 @@ namespace KinectProject.Windows
             {
                 GL.Color3(Color.DimGray);
                 _fullCube.Draw();
+            }
+        }
+        void SwitchDisplayModel()
+        {
+            if( status == WindowStatus.DisplayModelStage)
+            {
+                status = WindowStatus.ScanDataStage;
+            }
+            if( status == WindowStatus.ScanDataStage)
+            {
+                var voxels = _scannedItem.Vertices.ToVoxels();
+                MarchingCubes.SetModeToCubes();
+                _mesh = MarchingCubes.CreateMesh(voxels);               
+
+                status = WindowStatus.DisplayModelStage;
+
             }
         }
     }
