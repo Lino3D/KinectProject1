@@ -31,12 +31,12 @@ namespace KinectProject.Windows
 
         DepthImagePixel[] _depthPixels;
         private double[,] _depthMap;
-        private List<CubePoint> _depthPoints;
+        private List<DrawablePoint3D> _depthPoints;
         public static KinectSensor Sensor;
-        private List<Data> _datas = new List<Data>();
-        private Cube _fullCube;
-        private Cube _scannedItem;
-        private Cube _actualPreview;
+        private List<DepthData> _datas = new List<DepthData>();
+        private Geometry.Rectangle _fullCube;
+        private Geometry.Rectangle _scannedItem;
+        private Geometry.Rectangle _actualPreview;
         private int _kinectDepthImageHeight;
         private int _kinectDepthImageWidth;
         readonly int _widthSize = (int)Math.Ceiling(Constants.Constants.CubeWidth);
@@ -53,13 +53,13 @@ namespace KinectProject.Windows
             this.KeyUp += OnKeyUp;
             this.Context.SwapInterval = 1;
 
-            _fullCube = new Cube
+            _fullCube = new Geometry.Rectangle
             {
                 Center = new Vector3(
-                    Constants.Constants.HalfCubeWidth, 
-                    Constants.Constants.HalfCubeHeight, 
+                    Constants.Constants.HalfCubeWidth,
+                    Constants.Constants.HalfCubeHeight,
                     Constants.Constants.HalfCubeDepth),
-                Vertices = new CubePoint[_widthSize, _heightSize, _depthSize]
+                Vertices = new DrawablePoint3D[_widthSize, _heightSize, _depthSize]
             };
             for (var x = 0; x < _widthSize; x++)
             {
@@ -67,7 +67,7 @@ namespace KinectProject.Windows
                 {
                     for (var z = 0; z < _depthSize; z++)
                     {
-                        _fullCube.Vertices[x, y, z] = new CubePoint
+                        _fullCube.Vertices[x, y, z] = new DrawablePoint3D
                         {
                             X = x,
                             Y = y,
@@ -133,13 +133,13 @@ namespace KinectProject.Windows
 
         private void MakeSnapshot()
         {
-            var data = new Data
+            var data = new DepthData
             {
                 DepthMap = _depthMap,
                 Cube = _scannedItem ?? _fullCube
             };
             _datas.Add(data);
-            _scannedItem = Data.ProcessData(_datas);
+            _scannedItem = DepthData.ProcessData(_datas);
             _actualPreview = null;
 
          //   if (SnapshotMade != null)
@@ -148,14 +148,14 @@ namespace KinectProject.Windows
 
         private void MakePreview()
         {
-            var data = new Data
+            var data = new DepthData
             {
                 DepthMap = _depthMap,
                 Cube = _scannedItem ?? _fullCube
             };
-            var datasCopy = new List<Data>(_datas) { data };
+            var datasCopy = new List<DepthData>(_datas) { data };
 
-            _actualPreview = Data.ProcessData(datasCopy);
+            _actualPreview = DepthData.ProcessData(datasCopy);
         }
 
         private void Create3DMesh()
@@ -206,7 +206,7 @@ namespace KinectProject.Windows
             if (_depthPixels == null) 
                 return; 
 
-            var depthPoints = new List<CubePoint>();
+            var depthPoints = new List<DrawablePoint3D>();
             var depthMap = new double[_widthSize, _heightSize];
             CleanDepthMap(depthMap);
 
@@ -223,7 +223,7 @@ namespace KinectProject.Windows
                     int newY = (int) ((-origY + 240) * Constants.Constants.FocalLength * z / 10 + Constants.Constants.HalfCubeWidth);
                     double newZ = z / 10 - Constants.Constants.DistanceToCube;
 
-                    var cp = new CubePoint()
+                    var cp = new DrawablePoint3D()
                     {
                         X = newX,
                         Y = newY,

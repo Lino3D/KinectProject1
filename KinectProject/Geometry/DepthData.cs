@@ -6,27 +6,25 @@ using System.Threading.Tasks;
 
 namespace KinectProject.Geometry
 {
-    public class Data
+    public class DepthData
     {
-        public Cube Cube { get; set; }
+        public Rectangle Cube { get; set; }
         public double[,] DepthMap { get; set; }
 
-
-
-        public static Cube ProcessData(List<Data> datas)
+        public static Rectangle ProcessData(List<DepthData> datas)
         {
             var first = datas.FirstOrDefault();
             if (first != null)
             {
-                var firstCube = first.Cube;
-                var xLen = firstCube.Vertices.GetLength(0);
-                var yLen = firstCube.Vertices.GetLength(1);
-                var zLen = firstCube.Vertices.GetLength(2);
+                var firstRectangle = first.Cube;
+                var xLen = firstRectangle.Vertices.GetLength(0);
+                var yLen = firstRectangle.Vertices.GetLength(1);
+                var zLen = firstRectangle.Vertices.GetLength(2);
 
-                var result = new Cube
+                var result = new Rectangle
                 {
-                    Center = firstCube.Center,
-                    Vertices = new CubePoint[xLen, yLen, zLen]
+                    Center = firstRectangle.Center,
+                    Vertices = new DrawablePoint3D[xLen, yLen, zLen]
                 };
 
                 for (var x = 0; x < xLen; x++)
@@ -35,7 +33,7 @@ namespace KinectProject.Geometry
                     {
                         for (var z = 0; z < zLen; z++)
                         {
-                            result.Vertices[x, y, z] = (CubePoint)firstCube.Vertices[x, y, z].Clone();
+                            result.Vertices[x, y, z] = (DrawablePoint3D)firstRectangle.Vertices[x, y, z].Clone();
                             result.Vertices[x, y, z].Value = true;
                         }
                     }

@@ -3,7 +3,7 @@ using OpenTK;
 
 namespace KinectProject.Geometry
 {
-    public class CubePoint : ICloneable
+    public class DrawablePoint3D : ICloneable
     {
         public double X { get; set; }
         public double Y { get; set; }

@@ -48,7 +48,7 @@ namespace KinectProject.Constants
         public const float HalfCubeHeight = CubeHeight / 2;
         public const float HalfCubeDepth = CubeDepth / 2;
 
-        public static readonly Vector3[] CubeCorners =
+        public static readonly Vector3[] RectCorners =
         {
             new Vector3(-HalfCubeWidth, -HalfCubeHeight, DistanceToCube),
             new Vector3(HalfCubeWidth, -HalfCubeHeight, DistanceToCube),

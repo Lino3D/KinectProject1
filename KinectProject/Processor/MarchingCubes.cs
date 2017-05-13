@@ -441,10 +441,12 @@ namespace KinectProject.Processor
                 }
             }
 
-            var mesh = new Mesh();
+            var mesh = new Mesh
+            {
+                Vertices = verts.ToArray(),
+                Triangles = index.ToArray()
+            };
 
-            mesh.Vertices = verts.ToArray();
-            mesh.Triangles = index.ToArray();
 
             return mesh;
         }
@@ -466,9 +468,8 @@ namespace KinectProject.Processor
         //MarchCube performs the Marching Cubes algorithm on a single cube
         private static void MarchCube(Vector3 pos, float[] cube, List<Vector3> vertList, List<int> indexList)
         {
-            int i, j, vert, idx;
+            int i;
             var flagIndex = 0;
-            var offset = 0.0f;
 
             var edgeVertex = new Vector3[12];
 
@@ -487,7 +488,7 @@ namespace KinectProject.Processor
                 //if there is an intersection on this edge
                 if ((edgeFlags & (1 << i)) != 0)
                 {
-                    offset = GetOffset(cube[edgeConnection[i, 0]], cube[edgeConnection[i, 1]]);
+                    var offset = GetOffset(cube[edgeConnection[i, 0]], cube[edgeConnection[i, 1]]);
 
                     edgeVertex[i].X = pos.X + (vertexOffset[edgeConnection[i, 0], 0] + offset * edgeDirection[i, 0]);
                     edgeVertex[i].Y = pos.Y + (vertexOffset[edgeConnection[i, 0], 1] + offset * edgeDirection[i, 1]);
@@ -500,11 +501,12 @@ namespace KinectProject.Processor
             {
                 if (triangleConnectionTable[flagIndex, 3 * i] < 0) break;
 
-                idx = vertList.Count;
+                var idx = vertList.Count;
 
+                int j;
                 for (j = 0; j < 3; j++)
                 {
-                    vert = triangleConnectionTable[flagIndex, 3 * i + j];
+                    var vert = triangleConnectionTable[flagIndex, 3 * i + j];
                     indexList.Add(idx + windingOrder[j]);
                     vertList.Add(edgeVertex[vert]);
                 }

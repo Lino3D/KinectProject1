@@ -11,40 +11,40 @@ namespace KinectProject
                         Constants.Constants.DistanceToCube);
  
 
-        public static void DrawWithShift(this CubePoint cubePoint)
+        public static void DrawWithShift(this DrawablePoint3D drawablePoint3D)
         {
-            cubePoint.Shift(_shift).Draw();
+            drawablePoint3D.Shift(_shift).Draw();
         }
 
-        public static void Draw(this CubePoint cubePoint)
+        public static void Draw(this DrawablePoint3D drawablePoint3D)
         {
-            GL.Vertex3(cubePoint.X, cubePoint.Y, cubePoint.Z);
+            GL.Vertex3(drawablePoint3D.X, drawablePoint3D.Y, drawablePoint3D.Z);
         }
 
-        private static CubePoint Shift(this CubePoint cubePoint, Vector3 shift)
+        private static DrawablePoint3D Shift(this DrawablePoint3D drawablePoint3D, Vector3 shift)
         {
-            return new CubePoint
+            return new DrawablePoint3D
             {
-                X = cubePoint.X + shift.X,
-                Y = cubePoint.Y + shift.Y,
-                Z = cubePoint.Z + shift.Z,
-                Value = cubePoint.Value,
+                X = drawablePoint3D.X + shift.X,
+                Y = drawablePoint3D.Y + shift.Y,
+                Z = drawablePoint3D.Z + shift.Z,
+                Value = drawablePoint3D.Value,
             };
         }
 
-        public static bool NotInCube(this CubePoint p)
+        public static bool NotInCube(this DrawablePoint3D p)
         {
             return !p.InCube();
         }
 
-        public static bool InCube(this CubePoint p)
+        public static bool InCube(this DrawablePoint3D p)
         {
             return p.X >= 0 && p.X <=  Constants.Constants.CubeWidth &&
                    p.Y >= 0 && p.Y <= Constants.Constants.CubeHeight &&
                    p.Z >= 0 && p.Z <= Constants.Constants.CubeDepth;
         }
 
-        public static bool InCubeWithoutDepth(this CubePoint p)
+        public static bool InCubeWithoutDepth(this DrawablePoint3D p)
         {
             return p.X >= 0 && p.X <= Constants.Constants.CubeWidth &&
                    p.Y >= 0 && p.Y <= Constants.Constants.CubeHeight;
@@ -68,45 +68,45 @@ namespace KinectProject
             GL.Color3(Color.Red);
 
             GL.Begin(PrimitiveType.Lines);
-            GL.Vertex3(Constants.Constants.CubeCorners[0]);
-            GL.Vertex3(Constants.Constants.CubeCorners[1]);
+            GL.Vertex3(Constants.Constants.RectCorners[0]);
+            GL.Vertex3(Constants.Constants.RectCorners[1]);
 
-            GL.Vertex3(Constants.Constants.CubeCorners[0]);
-            GL.Vertex3(Constants.Constants.CubeCorners[3]);
+            GL.Vertex3(Constants.Constants.RectCorners[0]);
+            GL.Vertex3(Constants.Constants.RectCorners[3]);
 
-            GL.Vertex3(Constants.Constants.CubeCorners[0]);
-            GL.Vertex3(Constants.Constants.CubeCorners[4]);
+            GL.Vertex3(Constants.Constants.RectCorners[0]);
+            GL.Vertex3(Constants.Constants.RectCorners[4]);
 
-            GL.Vertex3(Constants.Constants.CubeCorners[1]);
-            GL.Vertex3(Constants.Constants.CubeCorners[2]);
+            GL.Vertex3(Constants.Constants.RectCorners[1]);
+            GL.Vertex3(Constants.Constants.RectCorners[2]);
 
-            GL.Vertex3(Constants.Constants.CubeCorners[1]);
-            GL.Vertex3(Constants.Constants.CubeCorners[5]);
+            GL.Vertex3(Constants.Constants.RectCorners[1]);
+            GL.Vertex3(Constants.Constants.RectCorners[5]);
 
-            GL.Vertex3(Constants.Constants.CubeCorners[2]);
-            GL.Vertex3(Constants.Constants.CubeCorners[3]);
+            GL.Vertex3(Constants.Constants.RectCorners[2]);
+            GL.Vertex3(Constants.Constants.RectCorners[3]);
 
-            GL.Vertex3(Constants.Constants.CubeCorners[2]);
-            GL.Vertex3(Constants.Constants.CubeCorners[6]);
+            GL.Vertex3(Constants.Constants.RectCorners[2]);
+            GL.Vertex3(Constants.Constants.RectCorners[6]);
 
-            GL.Vertex3(Constants.Constants.CubeCorners[3]);
-            GL.Vertex3(Constants.Constants.CubeCorners[7]);
+            GL.Vertex3(Constants.Constants.RectCorners[3]);
+            GL.Vertex3(Constants.Constants.RectCorners[7]);
 
-            GL.Vertex3(Constants.Constants.CubeCorners[4]);
-            GL.Vertex3(Constants.Constants.CubeCorners[5]);
+            GL.Vertex3(Constants.Constants.RectCorners[4]);
+            GL.Vertex3(Constants.Constants.RectCorners[5]);
 
-            GL.Vertex3(Constants.Constants.CubeCorners[4]);
-            GL.Vertex3(Constants.Constants.CubeCorners[7]);
+            GL.Vertex3(Constants.Constants.RectCorners[4]);
+            GL.Vertex3(Constants.Constants.RectCorners[7]);
 
-            GL.Vertex3(Constants.Constants.CubeCorners[5]);
-            GL.Vertex3(Constants.Constants.CubeCorners[6]);
+            GL.Vertex3(Constants.Constants.RectCorners[5]);
+            GL.Vertex3(Constants.Constants.RectCorners[6]);
 
-            GL.Vertex3(Constants.Constants.CubeCorners[6]);
-            GL.Vertex3(Constants.Constants.CubeCorners[7]);
+            GL.Vertex3(Constants.Constants.RectCorners[6]);
+            GL.Vertex3(Constants.Constants.RectCorners[7]);
             GL.End();
         }
 
-        public static void Draw(this Cube actualCube, bool drawAll = false)
+        public static void Draw(this Geometry.Rectangle actualCube, bool drawAll = false)
         {
             GL.Begin(PrimitiveType.Points);
             var xLen = actualCube.Vertices.GetLength(0);
@@ -140,7 +140,7 @@ namespace KinectProject
                 && z % Constants.Constants.Skip == 0;
         }
 
-        public static float[,,] ToVoxels(this CubePoint[,,] vertices)
+        public static float[,,] ToVoxels(this DrawablePoint3D[,,] vertices)
         {
             var xLen = vertices.GetLength(0);
             var yLen = vertices.GetLength(1);
