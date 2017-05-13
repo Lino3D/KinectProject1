@@ -297,37 +297,8 @@ namespace KinectProject.Windows
             {
                 Extensions.DrawBox();
             }
-            if (_depthPoints != null)
-            {
-                GL.Color3(Color.White);
-                GL.Begin(PrimitiveType.Points);
 
-                for (var i = 0; i < _depthPoints.Count; i += Constants.Constants.Skip)
-                {
-                    if (_depthPoints[i] == null || (!_depthPoints[i].InCube() && !Constants.Constants.DrawDepthImageOutsideBox))
-                        continue;
-                    _depthPoints[i].DrawWithShift();
-                }
-                GL.End();
-            }
-
-            if (_actualPreview != null)
-            {
-                GL.Color3(Color.Red);
-                _actualPreview.Draw();
-            }
-
-            if (_scannedItem != null)
-            {
-                GL.Color3(Color.Yellow);
-                _scannedItem.Draw();
-            }
-
-            if (_fullCube != null && Constants.Constants.ShowFullCube)
-            {
-                GL.Color3(Color.DimGray);
-                _fullCube.Draw();
-            }
+            DrawObjectsByStage();
 
             Context.SwapBuffers();
         }
