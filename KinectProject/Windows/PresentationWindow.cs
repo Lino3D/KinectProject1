@@ -12,6 +12,16 @@ namespace KinectProject.Windows
 {
     public class PresentationWindow : CustomWindow
     {
+        protected Vector3 Eye = Constants.Constants.DefaultEyePosition;
+        protected Vector3 Target = Constants.Constants.DefaultTargetPosition;
+        protected Vector3 Up = Constants.Constants.DefaultUpVetor;
+        private double _phi = Constants.Constants.DefaultPhiAngle;
+        protected Matrix4 Projection;
+        private double _radius = Constants.Constants.DefaultRadius;
+        private double _theta = Constants.Constants.DefaultThetaAngle;
+
+
+
         private List<Data> _datas = null;
         private Cube _scannedItem = null;
         private bool newData = false;

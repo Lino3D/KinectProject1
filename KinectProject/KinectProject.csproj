@@ -60,6 +60,7 @@
     <Compile Include="Windows\CustomWindow.cs" />
     <Compile Include="Windows\DepthWindow.cs" />
     <Compile Include="Windows\PresentationWindow.cs" />
+    <Compile Include="Windows\WindowStatus.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
