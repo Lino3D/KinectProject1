@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using KinectProject.Geometry;
 using Microsoft.Kinect;
 using OpenTK;
@@ -34,12 +35,12 @@ namespace KinectProject.Windows
         public DepthWindow()
             : base(800, 600)
         {
-            Load += LoadHandler;
-            Resize += ResizeHandler;
-            UpdateFrame += UpdateHandler;
-            RenderFrame += RenderHandler;
-            KeyUp += OnKeyUp;
-            Context.SwapInterval = 1;
+            this.Load += LoadHandler;
+            this.Resize += ResizeHandler;
+            this.UpdateFrame += UpdateHandler;
+            this.RenderFrame += RenderHandler;
+            this.KeyUp += OnKeyUp;
+            this.Context.SwapInterval = 1;
 
             _fullCube = new Cube
             {
@@ -141,36 +142,22 @@ namespace KinectProject.Windows
         {
             GL.Enable(EnableCap.DepthTest);
 
-            foreach (var potentialSensor in KinectSensor.KinectSensors)
+            Sensor = KinectSensor.KinectSensors.FirstOrDefault(x => x.Status == KinectStatus.Connected);
+
+            if (Sensor == null) return;
+            Sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
+            Sensor.DepthFrameReady += SensorDepthFrameReady;
+
+            _kinectDepthImageWidth = Sensor.DepthStream.FrameWidth;
+            _kinectDepthImageHeight = Sensor.DepthStream.FrameHeight;
+
+            try
             {
-                if (potentialSensor.Status == KinectStatus.Connected)
-                {
-                    Sensor = potentialSensor;
-                    break;
-                }
+                Sensor.Start();
             }
-
-            if (null != Sensor)
+            catch (Exception)
             {
-                Sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
-                Sensor.DepthFrameReady += SensorDepthFrameReady;
-
-                _kinectDepthImageWidth = Sensor.DepthStream.FrameWidth;
-                _kinectDepthImageHeight = Sensor.DepthStream.FrameHeight;
-
-                try
-                {
-                    Sensor.Start();
-                }
-                catch (Exception)
-                {
-                    Sensor = null;
-                }
-            }
-
-            if (null == Sensor && !DebugWithoutKinect)
-            {
-                throw new Exception("No kinect connected");
+                Sensor = null;
             }
         }
 
@@ -178,19 +165,15 @@ namespace KinectProject.Windows
         {
             using (var depthFrame = e.OpenDepthImageFrame())
             {
-                if (depthFrame != null)
-                {
-                    
-                    _depthPixels = new DepthImagePixel[Sensor.DepthStream.FramePixelDataLength];
-                    depthFrame.CopyDepthImagePixelDataTo(_depthPixels);
-                }
+                if (depthFrame == null) return;
+                _depthPixels = new DepthImagePixel[Sensor.DepthStream.FramePixelDataLength];
+                depthFrame.CopyDepthImagePixelDataTo(_depthPixels);
             }
         }
 
         private void ResizeHandler(object sender, EventArgs e)
         {
             GL.Viewport(ClientRectangle);
-
             var aspectRatio = Width/(float) Height;
             Projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1, 512);
             GL.MatrixMode(MatrixMode.Projection);
@@ -274,8 +257,6 @@ namespace KinectProject.Windows
 
         private void RenderHandler(object sender, FrameEventArgs e)
         {
-        //    Context.MakeCurrent(WindowInfo);
-
             GL.Clear(ClearBufferMask.ColorBufferBit |
                      ClearBufferMask.DepthBufferBit |
                      ClearBufferMask.StencilBufferBit);
@@ -321,8 +302,6 @@ namespace KinectProject.Windows
                 GL.Color3(Color.DimGray);
                 _fullCube.Draw();
             }
-
-         //   Context.MakeCurrent(WindowInfo);
             Context.SwapBuffers();
         }
     }
