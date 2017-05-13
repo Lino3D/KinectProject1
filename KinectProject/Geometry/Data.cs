@@ -15,47 +15,53 @@ namespace KinectProject.Geometry
 
         public static Cube ProcessData(List<Data> datas)
         {
-            var firstCube = datas.First().Cube;
-            var xLen = firstCube.Vertices.GetLength(0);
-            var yLen = firstCube.Vertices.GetLength(1);
-            var zLen = firstCube.Vertices.GetLength(2);
-
-            Cube result = new Cube();
-            result.Center = firstCube.Center;
-            result.Vertices = new CubePoint[xLen, yLen, zLen];
-
-            for (int x = 0; x < xLen; x++)
+            var first = datas.FirstOrDefault();
+            if (first != null)
             {
-                for (int y = 0; y < yLen; y++)
+                var firstCube = first.Cube;
+                var xLen = firstCube.Vertices.GetLength(0);
+                var yLen = firstCube.Vertices.GetLength(1);
+                var zLen = firstCube.Vertices.GetLength(2);
+
+                var result = new Cube
                 {
-                    for (int z = 0; z < zLen; z++)
+                    Center = firstCube.Center,
+                    Vertices = new CubePoint[xLen, yLen, zLen]
+                };
+
+                for (var x = 0; x < xLen; x++)
+                {
+                    for (var y = 0; y < yLen; y++)
                     {
-                        result.Vertices[x, y, z] = (CubePoint)firstCube.Vertices[x, y, z].Clone();
-                        result.Vertices[x, y, z].Value = true;
+                        for (var z = 0; z < zLen; z++)
+                        {
+                            result.Vertices[x, y, z] = (CubePoint)firstCube.Vertices[x, y, z].Clone();
+                            result.Vertices[x, y, z].Value = true;
+                        }
                     }
                 }
-            }
 
-            foreach (Data data in datas)
-            {
-                for (int x = 0; x < xLen; x++)
+                foreach (var data in datas)
                 {
-                    for (int y = 0; y < yLen; y++)
+                    for (var x = 0; x < xLen; x++)
                     {
-                        for (int z = 0; z < zLen; z++)
+                        for (var y = 0; y < yLen; y++)
                         {
-                            var cubePoint = data.Cube.Vertices[x, y, z];
-                            if (cubePoint.NotInCube() ||
-                                cubePoint.Z < data.DepthMap[(int)cubePoint.X, (int)cubePoint.Y])
+                            for (var z = 0; z < zLen; z++)
                             {
-                                result.Vertices[x, y, z].Value = false;
+                                var cubePoint = data.Cube.Vertices[x, y, z];
+                                if (cubePoint.NotInCube() ||
+                                    cubePoint.Z < data.DepthMap[(int)cubePoint.X, (int)cubePoint.Y])
+                                {
+                                    result.Vertices[x, y, z].Value = false;
+                                }
                             }
                         }
                     }
                 }
+                return result;
             }
-
-            return result;
+            return null;
         }
     }
 }
