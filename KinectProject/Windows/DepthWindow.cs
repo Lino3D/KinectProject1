@@ -27,14 +27,7 @@ namespace KinectProject.Windows
         private double _radius = Constants.Constants.DefaultRadius;
         private double _theta = Constants.Constants.DefaultThetaAngle;
 
-
-        // From presentation window
-        //private List<Data> _datas = null;
-        //private Cube _scannedItem = null;
-        private bool newData = false;
         private Mesh _mesh = null;
-
-
 
         DepthImagePixel[] _depthPixels;
         private double[,] _depthMap;
@@ -53,8 +46,8 @@ namespace KinectProject.Windows
         public DepthWindow()
             : base(800, 600)
         {
-            this.Load += OnLoad;
-         //   this.Resize += ResizeHandler;
+            this.Load += OnLoad;            
+            Resize += ResizeHandler;
             this.UpdateFrame += UpdateHandler;
             this.RenderFrame += RenderHandler;
             this.KeyUp += OnKeyUp;
@@ -128,6 +121,15 @@ namespace KinectProject.Windows
         //{
         //    _actualPreview = null;
         //}
+
+        private void ResizeHandler(object sender, EventArgs e)
+        {
+            GL.Viewport(ClientRectangle);
+            var aspectRatio = Width / (float)Height;
+            Projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1, 512);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref Projection);
+        }
 
         private void MakeSnapshot()
         {
@@ -295,8 +297,37 @@ namespace KinectProject.Windows
             {
                 Extensions.DrawBox();
             }
+            if (_depthPoints != null)
+            {
+                GL.Color3(Color.White);
+                GL.Begin(PrimitiveType.Points);
 
-            DrawObjectsByStage();
+                for (var i = 0; i < _depthPoints.Count; i += Constants.Constants.Skip)
+                {
+                    if (_depthPoints[i] == null || (!_depthPoints[i].InCube() && !Constants.Constants.DrawDepthImageOutsideBox))
+                        continue;
+                    _depthPoints[i].DrawWithShift();
+                }
+                GL.End();
+            }
+
+            if (_actualPreview != null)
+            {
+                GL.Color3(Color.Red);
+                _actualPreview.Draw();
+            }
+
+            if (_scannedItem != null)
+            {
+                GL.Color3(Color.Yellow);
+                _scannedItem.Draw();
+            }
+
+            if (_fullCube != null && Constants.Constants.ShowFullCube)
+            {
+                GL.Color3(Color.DimGray);
+                _fullCube.Draw();
+            }
 
             Context.SwapBuffers();
         }
