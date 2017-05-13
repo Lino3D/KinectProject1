@@ -51,11 +51,15 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Geometry\Cube.cs" />
     <Compile Include="Geometry\CubePoint.cs" />
+    <Compile Include="Geometry\Data.cs" />
+    <Compile Include="Geometry\Mesh.cs" />
+    <Compile Include="Processor\MarchingCubes.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScannerWindow.cs" />
     <Compile Include="Windows\CustomWindow.cs" />
     <Compile Include="Windows\DepthWindow.cs" />
+    <Compile Include="Windows\PresentationWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
