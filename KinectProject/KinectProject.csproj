@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants\Constants.cs" />
-    <Compile Include="Extensions.cs" />
+    <Compile Include="Helpers\Helpers.cs" />
     <Compile Include="Geometry\Rectangle.cs" />
     <Compile Include="Geometry\DrawablePoint3D.cs" />
     <Compile Include="Geometry\DepthData.cs" />

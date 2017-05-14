@@ -2,11 +2,12 @@
 using KinectProject.Geometry;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
-namespace KinectProject
+
+namespace KinectProject.Helpers
 {
-    public static class Extensions
+    public static class Helpers
     {
-        static Vector3 _shift = new Vector3( -Constants.Constants.HalfCubeWidth,
+        static readonly Vector3 _shift = new Vector3( -Constants.Constants.HalfCubeWidth,
                         -Constants.Constants.HalfCubeHeight,
                         Constants.Constants.DistanceToCube);
  
@@ -28,7 +29,7 @@ namespace KinectProject
                 X = drawablePoint3D.X + shift.X,
                 Y = drawablePoint3D.Y + shift.Y,
                 Z = drawablePoint3D.Z + shift.Z,
-                Value = drawablePoint3D.Value,
+                DrawPoint = drawablePoint3D.DrawPoint,
             };
         }
 
@@ -65,7 +66,7 @@ namespace KinectProject
 
         public static void DrawBox()
         {
-            GL.Color3(Color.Orange);
+            GL.Color3(Color.WhiteSmoke);
 
             GL.Begin(PrimitiveType.Lines);
             GL.Vertex3(Constants.Constants.RectCorners[0]);
@@ -122,7 +123,7 @@ namespace KinectProject
                         if (drawAll ||
                             (
                                 (Constants.Constants.ShowPointsOutsideBox || vertex.InCube()) 
-                                && vertex.Value 
+                                && vertex.DrawPoint 
                                 && ShouldDrawThisVertex(x, y, z)
                             )
                         )
@@ -152,7 +153,7 @@ namespace KinectProject
                 {
                     for (int z = 0; z < zLen; z++)
                     {
-                        voxels[x, y, z] = vertices[x, y, z].Value ? 1 : 0;
+                        voxels[x, y, z] = vertices[x, y, z].DrawPoint ? 1 : 0;
                     }
                 }
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using KinectProject.Geometry;
+using KinectProject.Helpers;
 using Microsoft.Kinect;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -78,7 +79,7 @@ namespace KinectProject.Windows
                             X = x,
                             Y = y,
                             Z = z,
-                            Value = true,
+                            DrawPoint = true,
                         };
                     }
                 }
@@ -262,7 +263,7 @@ namespace KinectProject.Windows
                         X = newX,
                         Y = newY,
                         Z = newZ,
-                        Value = true
+                        DrawPoint = true
                     };
                     depthPoints.Add(cp);
 
@@ -281,7 +282,7 @@ namespace KinectProject.Windows
 
         private void UpdateDepthMapByPoint(double[,] newDepthMap, int newX, int newY, double newZ)
         {
-            if (Extensions.InCubeWithoutDepth(newX, newY))
+            if (Helpers.Helpers.InCubeWithoutDepth(newX, newY))
             {
                 if (newZ > Constants.Constants.DistanceToCube + Constants.Constants.CubeDepth)
                     newDepthMap[newX, newY] = Constants.Constants.CubeDepth;
@@ -289,7 +290,7 @@ namespace KinectProject.Windows
                 if (newZ < Constants.Constants.DistanceToCube)
                     newDepthMap[newX, newY] = 0;
             }
-            else if (!Extensions.InCube(newX, newY, newZ))
+            else if (!Helpers.Helpers.InCube(newX, newY, newZ))
             {
                 return;
             }
@@ -326,11 +327,8 @@ namespace KinectProject.Windows
 
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref lookat);
-
-            Extensions.DrawBox();
-
+            Helpers.Helpers.DrawBox();
             DrawObjectsByStage();
-
             Context.SwapBuffers();
         }
 
@@ -357,7 +355,7 @@ namespace KinectProject.Windows
                     var v2 = _mesh.Vertices[_mesh.Triangles[i + 1]];
                     var v3 = _mesh.Vertices[_mesh.Triangles[i + 2]];
 
-                    Extensions.DrawTriangle(v1, v2, v3);
+                    Helpers.Helpers.DrawTriangle(v1, v2, v3);
                 }
             }
 
@@ -386,7 +384,7 @@ namespace KinectProject.Windows
 
             if (_actualPreview != null)
             {
-                GL.Color3(Color.Orange);
+                GL.Color3(Color.Green);
                 _actualPreview.Draw();
             }
 
@@ -397,7 +395,8 @@ namespace KinectProject.Windows
             }
 
         }
-        void SwitchDisplayModel()
+
+        private void SwitchDisplayModel()
         {
             if( status == WindowStatus.DisplayModelStage)
             {

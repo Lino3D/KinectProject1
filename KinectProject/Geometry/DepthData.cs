@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KinectProject.Helpers;
 
 namespace KinectProject.Geometry
 {
@@ -34,7 +35,7 @@ namespace KinectProject.Geometry
                         for (var z = 0; z < zLen; z++)
                         {
                             result.Vertices[x, y, z] = (DrawablePoint3D)firstRectangle.Vertices[x, y, z].Clone();
-                            result.Vertices[x, y, z].Value = true;
+                            result.Vertices[x, y, z].DrawPoint = true;
                         }
                     }
                 }
@@ -51,7 +52,7 @@ namespace KinectProject.Geometry
                                 if (cubePoint.NotInCube() ||
                                     cubePoint.Z < data.DepthMap[(int)cubePoint.X, (int)cubePoint.Y])
                                 {
-                                    result.Vertices[x, y, z].Value = false;
+                                    result.Vertices[x, y, z].DrawPoint = false;
                                 }
                             }
                         }
