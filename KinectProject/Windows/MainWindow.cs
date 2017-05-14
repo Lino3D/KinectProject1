@@ -359,11 +359,9 @@ namespace KinectProject.Windows
                 }
             }
 
-            if (_scannedItem != null)
-            {
-                GL.Color3(Color.Orange);
-                _scannedItem.Draw();
-            }
+            if (_scannedItem == null) return;
+            GL.Color3(Color.Orange);
+            _scannedItem.Draw();
         }
 
         private void DrawScanningStageObjects()
@@ -388,12 +386,9 @@ namespace KinectProject.Windows
                 _actualPreview.Draw();
             }
 
-            if (_scannedItem != null)
-            {
-                GL.Color3(Color.Blue);
-                _scannedItem.Draw();
-            }
-
+            if (_scannedItem == null) return;
+            GL.Color3(Color.Blue);
+            _scannedItem.Draw();
         }
 
         private void SwitchDisplayModel()
