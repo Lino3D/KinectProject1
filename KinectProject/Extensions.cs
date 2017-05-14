@@ -65,7 +65,7 @@ namespace KinectProject
 
         public static void DrawBox()
         {
-            GL.Color3(Color.Red);
+            GL.Color3(Color.Orange);
 
             GL.Begin(PrimitiveType.Lines);
             GL.Vertex3(Constants.Constants.RectCorners[0]);

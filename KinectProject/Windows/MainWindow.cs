@@ -19,18 +19,18 @@ namespace KinectProject.Windows
 
         private WindowStatus status = WindowStatus.ScanDataStage;
 
-        protected Vector3 Eye = Constants.Constants.DefaultEyePosition;
+        protected Vector3 Eye = new Vector3(0, 0, 0);
         protected Vector3 Target = Constants.Constants.DefaultTargetPosition;
-        protected Vector3 Up = Constants.Constants.DefaultUpVetor;
-        private double _phi = Constants.Constants.DefaultPhiAngle;
+        protected Vector3 Up = new Vector3(0f, 1f, 0f);
+        private double _phi = Math.PI / 8;
         protected Matrix4 Projection;
-        private double _radius = Constants.Constants.DefaultRadius;
-        private double _theta = Constants.Constants.DefaultThetaAngle;
+        private double _radius = 160;
+        private double _theta = Math.PI;
         private bool _mouseCaptured;        
         private int _prevX;
         private int _prevY;
 
-        private Mesh _mesh = null;
+        private Mesh _mesh;
 
         DepthImagePixel[] _depthPixels;
         private double[,] _depthMap;
@@ -42,9 +42,9 @@ namespace KinectProject.Windows
         private Geometry.Rectangle _actualPreview;
         private int _kinectDepthImageHeight;
         private int _kinectDepthImageWidth;
-        readonly int _widthSize = (int)Math.Ceiling(Constants.Constants.CubeWidth);
-        readonly int _heightSize = (int)Math.Ceiling(Constants.Constants.CubeHeight);
-        readonly int _depthSize = (int)Math.Ceiling(Constants.Constants.CubeDepth);
+        readonly int _widthSize =  120 ;
+        readonly int _heightSize = 120;
+        readonly int _depthSize = 120;
 
         public MainWindow()
             : base(800, 600)
@@ -84,8 +84,6 @@ namespace KinectProject.Windows
                 }
             }
         }
-
-        //public event Program.SnapchotMade SnapshotMade;
         private void OnMouseMove(object sender, MouseMoveEventArgs e)
         {
             if (!_mouseCaptured)
@@ -329,10 +327,7 @@ namespace KinectProject.Windows
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref lookat);
 
-            if (Constants.Constants.ShowBoxOnDepthWindow)
-            {
-                Extensions.DrawBox();
-            }
+            Extensions.DrawBox();
 
             DrawObjectsByStage();
 
@@ -368,7 +363,7 @@ namespace KinectProject.Windows
 
             if (_scannedItem != null)
             {
-                GL.Color3(Color.Yellow);
+                GL.Color3(Color.Orange);
                 _scannedItem.Draw();
             }
         }
@@ -382,7 +377,7 @@ namespace KinectProject.Windows
 
                 for (var i = 0; i < _depthPoints.Count; i += Constants.Constants.Skip)
                 {
-                    if (_depthPoints[i] == null || (!_depthPoints[i].InCube() && !Constants.Constants.DrawDepthImageOutsideBox))
+                    if (_depthPoints[i] == null) // || (!_depthPoints[i].InCube() && !Constants.Constants.DrawDepthImageOutsideBox))
                         continue;
                     _depthPoints[i].DrawWithShift();
                 }
@@ -391,21 +386,16 @@ namespace KinectProject.Windows
 
             if (_actualPreview != null)
             {
-                GL.Color3(Color.Red);
+                GL.Color3(Color.Orange);
                 _actualPreview.Draw();
             }
 
             if (_scannedItem != null)
             {
-                GL.Color3(Color.Yellow);
+                GL.Color3(Color.Blue);
                 _scannedItem.Draw();
             }
 
-            if (_fullCube != null && Constants.Constants.ShowFullCube)
-            {
-                GL.Color3(Color.DimGray);
-                _fullCube.Draw();
-            }
         }
         void SwitchDisplayModel()
         {
@@ -420,7 +410,6 @@ namespace KinectProject.Windows
                 _mesh = MarchingCubes.CreateMesh(voxels);               
 
                 status = WindowStatus.DisplayModelStage;
-
             }
         }
     }

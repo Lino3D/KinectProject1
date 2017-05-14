@@ -6,10 +6,10 @@ namespace KinectProject.Constants
     public class Constants
     {
         #region Ustawienia kostki (wartoœci w cm)
-        public const float CubeWidth = 100;
-        public const float CubeHeight = 100;
-        public const float CubeDepth = 100;
-        public const float DistanceToCube = 100;
+        public const float CubeWidth = 120;
+        public const float CubeHeight = 120;
+        public const float CubeDepth = 120;
+        public const float DistanceToCube = 80;
         #endregion
 
         #region Obs³uga sterowania
