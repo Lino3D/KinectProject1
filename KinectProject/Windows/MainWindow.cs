@@ -17,17 +17,20 @@ namespace KinectProject.Windows
 {
     public class MainWindow : GameWindow
     {
+        // Camera
+        protected Vector3 Eye = new Vector3(0, 0, 0);
+        protected Vector3 CameraAt = new Vector3(0f, 0f, 140f);
+        protected Vector3 Up = new Vector3(0f, 1f, 0f);
+
         private const float RotateAngleStep = 0.01f;
         private WindowStatus status = WindowStatus.ScanDataStage;
         public const double KinectFocalLength = 0.00173667;
-        protected Vector3 Eye = new Vector3(0, 0, 0);
-        protected Vector3 Target = Constants.Constants.DefaultTargetPosition;
-        protected Vector3 Up = new Vector3(0f, 1f, 0f);
+
         private double _phi = Math.PI / 8;
         protected Matrix4 Projection;
         private double _radius = 160;
         private double _theta = Math.PI;
-        private bool _mouseCaptured;        
+        private bool _mouseCaptured;
         private int _prevX;
         private int _prevY;
 
@@ -47,7 +50,7 @@ namespace KinectProject.Windows
         public MainWindow()
             : base(800, 600)
         {
-            this.Load += OnLoad;            
+            this.Load += OnLoad;
             Resize += ResizeHandler;
             this.UpdateFrame += UpdateHandler;
             this.RenderFrame += RenderHandler;
@@ -111,30 +114,22 @@ namespace KinectProject.Windows
         }
         private void OnKeyUp(object sender, KeyboardKeyEventArgs e)
         {
-
-            if (e.Key == Key.Enter)
+            switch (e.Key)
             {
-                ScanObject();
-            }
-            
-            if( e.Key == Key.C)
-            {
-                SwitchToVoxels();
-            }
-
-            if (e.Key == Key.Left)
-            {
-                RotateScannedObject(0, MathHelper.DegreesToRadians(20), 0);
-            }
-
-            if (e.Key == Key.Right)
-            {
-                RotateScannedObject(0, MathHelper.DegreesToRadians(20), 0);
-            }
-
-            if (e.Key == Key.Escape)
-            {
-                Exit();
+                case Key.Enter:
+                    ScanObject();
+                    break;
+                case Key.C:
+                    SwitchToVoxels();
+                    break;
+                case Key.Left:
+                    RotateScannedObject(0, MathHelper.DegreesToRadians(10), 0);
+                    break;
+                case Key.Right:
+                    RotateScannedObject(0, MathHelper.DegreesToRadians(10), 0);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -143,7 +138,7 @@ namespace KinectProject.Windows
             _referenceRectangle.Rotate(angleX, angleY, angleZ);
             _scannedObject?.Rotate(angleX, angleY, angleZ);
         }
-        
+
 
         private void ResizeHandler(object sender, EventArgs e)
         {
@@ -195,29 +190,36 @@ namespace KinectProject.Windows
                 if (depthFrame == null) return;
                 depthFrame.CopyDepthImagePixelDataTo(this._depthPixels);
             }
-        } 
+        }
 
         private void UpdateHandler(object sender, FrameEventArgs e)
         {
             if (status != WindowStatus.ScanDataStage)
                 return;
-            if (_depthPixels == null) 
-                return; 
+            if (_depthPixels == null)
+                return;
 
             var depthPoints = new List<DrawablePoint3D>();
             var depthMap = new double[_rectSize, _rectSize];
-            CleanDepthMap(depthMap);
+
+            for (var x = 0; x < _rectSize; x++)
+            {
+                for (var y = 0; y < _rectSize; y++)
+                {
+                    depthMap[x, y] = double.MaxValue;
+                }
+            }
 
             for (var y = 0; y < _kinectDepthImageHeight; y++)
             {
                 for (var x = 0; x < _kinectDepthImageWidth; x++)
                 {
-                    var offset = x+ y * _kinectDepthImageWidth;
+                    var offset = x + y * _kinectDepthImageWidth;
                     var rawDepth = _depthPixels[offset].Depth;
                     if (Math.Abs(rawDepth) < 0.001) continue;
 
-                    var newX = (int) ((x - 320) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfRectWidth);
-                    var newY = (int) ((-y + 240) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfRectWidth);
+                    var newX = (int)((x - 320) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfRectWidth);
+                    var newY = (int)((-y + 240) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfRectWidth);
                     double newZ = rawDepth / 10 - Constants.Constants.DistanceToRect;
 
                     var cp = new DrawablePoint3D()
@@ -236,9 +238,9 @@ namespace KinectProject.Windows
             _depthMap = depthMap;
 
             // Update camera parameters
-            Eye.X = (float)(Target.X + _radius * Math.Cos(_phi) * Math.Sin(_theta));
-            Eye.Z = (float)(Target.Z + _radius * Math.Cos(_theta));
-            Eye.Y = (float)(Target.Y + _radius * Math.Sin(_phi));
+            Eye.X = (float)(CameraAt.X + _radius * Math.Cos(_phi) * Math.Sin(_theta));
+            Eye.Z = (float)(CameraAt.Z + _radius * Math.Cos(_theta));
+            Eye.Y = (float)(CameraAt.Y + _radius * Math.Sin(_phi));
         }
 
         private void UpdateDepthMapByPoint(double[,] newDepthMap, int newX, int newY, double newZ)
@@ -255,7 +257,7 @@ namespace KinectProject.Windows
             {
                 return;
             }
-            if (newDepthMap[newX, newY] <= 0.001 || newDepthMap[newX, newY] >= (Constants.Constants.RectDepth - 0.001))
+            if (newDepthMap[newX, newY] <= 0.001 || newDepthMap[newX, newY] >= (Constants.Constants.RectDepth)) //- 0.001))
             {
                 newDepthMap[newX, newY] = newZ;
             }
@@ -266,32 +268,22 @@ namespace KinectProject.Windows
             }
         }
 
-        private void CleanDepthMap(double[,] newDepthMap)
-        {
-            for (var x = 0; x < _rectSize; x++)
-            {
-                for (var y = 0; y < _rectSize; y++)
-                {
-                    newDepthMap[x, y] = double.MaxValue;
-                }
-            }
-        }
 
         private void RenderHandler(object sender, FrameEventArgs e)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit |
                      ClearBufferMask.StencilBufferBit
-                |ClearBufferMask.DepthBufferBit );
-            var lookAtMatrix = Matrix4.LookAt(Eye, Target, Up);
+                | ClearBufferMask.DepthBufferBit);
+            var lookAtMatrix = Matrix4.LookAt(Eye, CameraAt, Up);
             GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref lookAtMatrix);            
+            GL.LoadMatrix(ref lookAtMatrix);
             DrawObjectsByStage();
             Context.SwapBuffers();
         }
 
         private void DrawObjectsByStage()
         {
-            switch( status)
+            switch (status)
             {
                 case WindowStatus.ScanDataStage:
                     DrawScanningStageObjects();
@@ -301,7 +293,7 @@ namespace KinectProject.Windows
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
-            }            
+            }
         }
         private void DrawModelDisplayStageObjects()
         {
@@ -338,14 +330,14 @@ namespace KinectProject.Windows
 
         private void SwitchToVoxels()
         {
-            if( status == WindowStatus.DisplayModelStage)
+            if (status == WindowStatus.DisplayModelStage)
             {
                 status = WindowStatus.ScanDataStage;
             }
             if (status != WindowStatus.ScanDataStage) return;
             var voxels = _scannedObject.Vertices.ToVoxels();
             MarchingRects.SetModeToRects();
-            _mesh = MarchingRects.CreateMesh(voxels);               
+            _mesh = MarchingRects.CreateMesh(voxels);
             status = WindowStatus.DisplayModelStage;
         }
     }
