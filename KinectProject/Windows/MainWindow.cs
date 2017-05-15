@@ -17,9 +17,9 @@ namespace KinectProject.Windows
     public class MainWindow : GameWindow
     {
         private const bool DebugWithoutKinect = true;
-
+        private const float RotateAngleStep = 0.01f;
         private WindowStatus status = WindowStatus.ScanDataStage;
-
+        public const double KinectFocalLength = 0.00173667;
         protected Vector3 Eye = new Vector3(0, 0, 0);
         protected Vector3 Target = Constants.Constants.DefaultTargetPosition;
         protected Vector3 Up = new Vector3(0f, 1f, 0f);
@@ -91,8 +91,8 @@ namespace KinectProject.Windows
                 return;
             var dx = e.X - _prevX;
             var dy = e.Y - _prevY;
-            _theta += -dx * Constants.Constants.RotateAngleStep;
-            _phi += dy * Constants.Constants.RotateAngleStep;
+            _theta += -dx * RotateAngleStep;
+            _phi += dy * RotateAngleStep;
             _prevX = e.X;
             _prevY = e.Y;
         }
@@ -136,12 +136,12 @@ namespace KinectProject.Windows
 
             if (e.Key == Key.Left)
             {
-                RotateItem(0, -Constants.Constants.ItemAngleStep, 0);
+                RotateItem(0, MathHelper.DegreesToRadians(15), 0);
             }
 
             if (e.Key == Key.Right)
             {
-                RotateItem(0, Constants.Constants.ItemAngleStep, 0);
+                RotateItem(0, MathHelper.DegreesToRadians(15), 0);
             }
         }
 
@@ -245,18 +245,17 @@ namespace KinectProject.Windows
             var depthMap = new double[_widthSize, _heightSize];
             CleanDepthMap(depthMap);
 
-            for (var origY = 0; origY < _kinectDepthImageHeight; origY++)
+            for (var y = 0; y < _kinectDepthImageHeight; y++)
             {
-                for (var origX = 0; origX < _kinectDepthImageWidth; origX++)
+                for (var x = 0; x < _kinectDepthImageWidth; x++)
                 {
-                    var i = origY * _kinectDepthImageWidth + origX;
-                    
-                    double z = _depthPixels[i].Depth;
-                    if (Math.Abs(z) < 10e-3) continue;
+                    var offset = x+ y * _kinectDepthImageWidth;
+                    var rawDepth = _depthPixels[offset].Depth;
+                    if (Math.Abs(rawDepth) < 10e-3) continue;
 
-                    int newX = (int) ((origX - 320) * Constants.Constants.FocalLength * z / 10 + Constants.Constants.HalfCubeWidth);
-                    int newY = (int) ((-origY + 240) * Constants.Constants.FocalLength * z / 10 + Constants.Constants.HalfCubeWidth);
-                    double newZ = z / 10 - Constants.Constants.DistanceToCube;
+                    var newX = (int) ((x - 320) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfCubeWidth);
+                    var newY = (int) ((-y + 240) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfCubeWidth);
+                    double newZ = rawDepth / 10 - Constants.Constants.DistanceToCube;
 
                     var cp = new DrawablePoint3D()
                     {
@@ -327,7 +326,7 @@ namespace KinectProject.Windows
 
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref lookat);
-            Helpers.Helpers.DrawBox();
+            Helpers.Helpers.DrawRect();
             DrawObjectsByStage();
             Context.SwapBuffers();
         }
@@ -342,6 +341,8 @@ namespace KinectProject.Windows
                 case WindowStatus.DisplayModelStage:
                     DrawModelDisplayStageObjects();
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }            
         }
         private void DrawModelDisplayStageObjects()

@@ -7,14 +7,14 @@ namespace KinectProject.Helpers
 {
     public static class Helpers
     {
-        static readonly Vector3 _shift = new Vector3( -Constants.Constants.HalfCubeWidth,
+        public static readonly Vector3 Shift = new Vector3( -Constants.Constants.HalfCubeWidth,
                         -Constants.Constants.HalfCubeHeight,
                         Constants.Constants.DistanceToCube);
  
 
         public static void DrawWithShift(this DrawablePoint3D drawablePoint3D)
         {
-            drawablePoint3D.Shift(_shift).Draw();
+            drawablePoint3D.DoShift(Shift).Draw();
         }
 
         public static void Draw(this DrawablePoint3D drawablePoint3D)
@@ -22,7 +22,7 @@ namespace KinectProject.Helpers
             GL.Vertex3(drawablePoint3D.X, drawablePoint3D.Y, drawablePoint3D.Z);
         }
 
-        private static DrawablePoint3D Shift(this DrawablePoint3D drawablePoint3D, Vector3 shift)
+        private static DrawablePoint3D DoShift(this DrawablePoint3D drawablePoint3D, Vector3 shift)
         {
             return new DrawablePoint3D
             {
@@ -64,7 +64,7 @@ namespace KinectProject.Helpers
                    y >= 0 && y < Constants.Constants.CubeHeight;
         }
 
-        public static void DrawBox()
+        public static void DrawRect()
         {
             GL.Color3(Color.WhiteSmoke);
 
@@ -111,18 +111,18 @@ namespace KinectProject.Helpers
         {
             GL.Begin(PrimitiveType.Points);
             var lengthX = actualCube.Vertices.GetLength(0);
-            for (int x = 0; x < lengthX; x++)
+            for (var x = 0; x < lengthX; x++)
             {
                 var lengthY = actualCube.Vertices.GetLength(1);
-                for (int y = 0; y < lengthY; y++)
+                for (var y = 0; y < lengthY; y++)
                 {
                     var lengthZ = actualCube.Vertices.GetLength(2);
-                    for (int z = 0; z < lengthZ; z++)
+                    for (var z = 0; z < lengthZ; z++)
                     {
                         var vertex = actualCube.Vertices[x, y, z];
                         if (drawAll ||
                             (
-                                (Constants.Constants.ShowPointsOutsideBox || vertex.InCube()) 
+                                (vertex.InCube()) 
                                 && vertex.DrawPoint 
                                 && ShouldDrawThisVertex(x, y, z)
                             )
@@ -146,12 +146,12 @@ namespace KinectProject.Helpers
             var lengthX = vertices.GetLength(0);
             var lengthY = vertices.GetLength(1);
             var lengthZ = vertices.GetLength(2);
-            float[,,] voxels = new float[lengthX,lengthY,lengthZ];
-            for (int x = 0; x < lengthX; x++)
+            var voxels = new float[lengthX,lengthY,lengthZ];
+            for (var x = 0; x < lengthX; x++)
             {
-                for (int y = 0; y < lengthY; y++)
+                for (var y = 0; y < lengthY; y++)
                 {
-                    for (int z = 0; z < lengthZ; z++)
+                    for (var z = 0; z < lengthZ; z++)
                     {
                         voxels[x, y, z] = vertices[x, y, z].DrawPoint ? 1 : 0;
                     }
@@ -162,10 +162,10 @@ namespace KinectProject.Helpers
 
         public static void DrawTriangle(Vector3 v1, Vector3 v2, Vector3 v3)
         {
-            GL.Begin(BeginMode.LineLoop);
-            GL.Vertex3(v1 + _shift);
-            GL.Vertex3(v2 + _shift);
-            GL.Vertex3(v3 + _shift);
+            GL.Begin(PrimitiveType.Triangles);
+            GL.Vertex3(v1 + Shift);
+            GL.Vertex3(v2 + Shift);
+            GL.Vertex3(v3 + Shift);
             GL.End();
         }
     }
