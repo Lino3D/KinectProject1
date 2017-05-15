@@ -7,9 +7,9 @@ namespace KinectProject.Helpers
 {
     public static class Helpers
     {
-        public static readonly Vector3 Shift = new Vector3( -Constants.Constants.HalfCubeWidth,
-                        -Constants.Constants.HalfCubeHeight,
-                        Constants.Constants.DistanceToCube);
+        public static readonly Vector3 Shift = new Vector3( -Constants.Constants.HalfRectWidth,
+                        -Constants.Constants.HalfRectHeight,
+                        Constants.Constants.DistanceToRect);
  
 
         public static void DrawWithShift(this DrawablePoint3D drawablePoint3D)
@@ -33,55 +33,50 @@ namespace KinectProject.Helpers
             };
         }
 
-        public static bool NotInCube(this DrawablePoint3D p)
+        public static bool InRectDepth(this DrawablePoint3D p)
         {
-            return !p.InCube();
+            return p.X >= 0 && p.X <=  Constants.Constants.RectWidth &&
+                   p.Y >= 0 && p.Y <= Constants.Constants.RectHeight &&
+                   p.Z >= 0 && p.Z <= Constants.Constants.RectDepth;
         }
 
-        public static bool InCube(this DrawablePoint3D p)
+        public static bool InRectNoDepth(this DrawablePoint3D p)
         {
-            return p.X >= 0 && p.X <=  Constants.Constants.CubeWidth &&
-                   p.Y >= 0 && p.Y <= Constants.Constants.CubeHeight &&
-                   p.Z >= 0 && p.Z <= Constants.Constants.CubeDepth;
+            return p.X >= 0 && p.X <= Constants.Constants.RectWidth &&
+                   p.Y >= 0 && p.Y <= Constants.Constants.RectHeight;
         }
 
-        public static bool InCubeWithoutDepth(this DrawablePoint3D p)
+        public static bool InRectDepth(double x, double y, double z)
         {
-            return p.X >= 0 && p.X <= Constants.Constants.CubeWidth &&
-                   p.Y >= 0 && p.Y <= Constants.Constants.CubeHeight;
+            return x >= 0 && x < Constants.Constants.RectWidth &&
+                   y >= 0 && y < Constants.Constants.RectHeight &&
+                   z >= 0 && z < Constants.Constants.RectDepth;
         }
 
-        public static bool InCube(double x, double y, double z)
+        public static bool InRectNoDepth(int x, int y)
         {
-            return x >= 0 && x < Constants.Constants.CubeWidth &&
-                   y >= 0 && y < Constants.Constants.CubeHeight &&
-                   z >= 0 && z < Constants.Constants.CubeDepth;
-        }
-
-        public static bool InCubeWithoutDepth(int x, int y)
-        {
-            return x >= 0 && x < Constants.Constants.CubeWidth &&
-                   y >= 0 && y < Constants.Constants.CubeHeight;
+            return x >= 0 && x < Constants.Constants.RectWidth &&
+                   y >= 0 && y < Constants.Constants.RectHeight;
         }
 
        
 
-        public static void Draw(this Geometry.Rectangle actualCube, bool drawAll = false)
+        public static void Draw(this Geometry.Rectangle actualRect, bool drawAll = false)
         {
             GL.Begin(PrimitiveType.Points);
-            var lengthX = actualCube.Vertices.GetLength(0);
+            var lengthX = actualRect.Vertices.GetLength(0);
             for (var x = 0; x < lengthX; x++)
             {
-                var lengthY = actualCube.Vertices.GetLength(1);
+                var lengthY = actualRect.Vertices.GetLength(1);
                 for (var y = 0; y < lengthY; y++)
                 {
-                    var lengthZ = actualCube.Vertices.GetLength(2);
+                    var lengthZ = actualRect.Vertices.GetLength(2);
                     for (var z = 0; z < lengthZ; z++)
                     {
-                        var vertex = actualCube.Vertices[x, y, z];
+                        var vertex = actualRect.Vertices[x, y, z];
                         if (drawAll ||
                             (
-                                (vertex.InCube()) 
+                                (vertex.InRectDepth()) 
                                 && vertex.DrawPoint 
                             )
                         )

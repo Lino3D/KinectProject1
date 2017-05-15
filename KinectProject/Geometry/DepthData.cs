@@ -48,8 +48,7 @@ namespace KinectProject.Geometry
                         for (var z = 0; z < lengthZ; z++)
                         {
                             var rectVertex = depthData.Rect.Vertices[x, y, z];
-                            if (rectVertex.NotInCube() ||
-                                rectVertex.Z < depthData.DepthMap[(int)rectVertex.X, (int)rectVertex.Y])
+                            if (!rectVertex.InRectDepth() || rectVertex.Z < depthData.DepthMap[(int)rectVertex.X, (int)rectVertex.Y])
                             {
                                 result.Vertices[x, y, z].DrawPoint = false;
                             }

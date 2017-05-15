@@ -42,9 +42,9 @@ namespace KinectProject.Windows
         private Geometry.Rectangle _scannedObject;
         private int _kinectDepthImageHeight;
         private int _kinectDepthImageWidth;
-        readonly int _widthSize =  120 ;
-        readonly int _heightSize = 120;
-        readonly int _depthSize = 120;
+        private int _widthSize =  120 ;
+        private int _heightSize = 120;
+        private int _depthSize = 120;
 
         public MainWindow()
             : base(800, 600)
@@ -62,9 +62,9 @@ namespace KinectProject.Windows
             _referenceRectangle = new Geometry.Rectangle
             {
                 Center = new Vector3(
-                    Constants.Constants.HalfCubeWidth,
-                    Constants.Constants.HalfCubeHeight,
-                    Constants.Constants.HalfCubeDepth),
+                    Constants.Constants.HalfRectWidth,
+                    Constants.Constants.HalfRectHeight,
+                    Constants.Constants.HalfRectDepth),
                 Vertices = new DrawablePoint3D[_widthSize, _heightSize, _depthSize]
             };
             for (var x = 0; x < _widthSize; x++)
@@ -143,8 +143,7 @@ namespace KinectProject.Windows
         private void RotateScannedObject(float angleX, float angleY, float angleZ)
         {
             _referenceRectangle.Rotate(angleX, angleY, angleZ);
-            if (_scannedObject != null)
-                _scannedObject.Rotate(angleX, angleY, angleZ);
+            _scannedObject?.Rotate(angleX, angleY, angleZ);
         }
         
 
@@ -221,9 +220,9 @@ namespace KinectProject.Windows
                     var rawDepth = _depthPixels[offset].Depth;
                     if (Math.Abs(rawDepth) < 0.001) continue;
 
-                    var newX = (int) ((x - 320) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfCubeWidth);
-                    var newY = (int) ((-y + 240) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfCubeWidth);
-                    double newZ = rawDepth / 10 - Constants.Constants.DistanceToCube;
+                    var newX = (int) ((x - 320) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfRectWidth);
+                    var newY = (int) ((-y + 240) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfRectWidth);
+                    double newZ = rawDepth / 10 - Constants.Constants.DistanceToRect;
 
                     var cp = new DrawablePoint3D()
                     {
@@ -248,20 +247,19 @@ namespace KinectProject.Windows
 
         private void UpdateDepthMapByPoint(double[,] newDepthMap, int newX, int newY, double newZ)
         {
-            if (Helpers.Helpers.InCubeWithoutDepth(newX, newY))
+            if (Helpers.Helpers.InRectNoDepth(newX, newY))
             {
-                if (newZ > Constants.Constants.DistanceToCube + Constants.Constants.CubeDepth)
-                    newDepthMap[newX, newY] = Constants.Constants.CubeDepth;
+                if (newZ > Constants.Constants.DistanceToRect + Constants.Constants.RectDepth)
+                    newDepthMap[newX, newY] = Constants.Constants.RectDepth;
 
-                if (newZ < Constants.Constants.DistanceToCube)
+                if (newZ < Constants.Constants.DistanceToRect)
                     newDepthMap[newX, newY] = 0;
             }
-            else if (!Helpers.Helpers.InCube(newX, newY, newZ))
+            else if (!Helpers.Helpers.InRectDepth(newX, newY, newZ))
             {
                 return;
             }
-
-            if (newDepthMap[newX, newY] <= 0.001 || newDepthMap[newX, newY] >= (Constants.Constants.CubeDepth - 0.001))
+            if (newDepthMap[newX, newY] <= 0.001 || newDepthMap[newX, newY] >= (Constants.Constants.RectDepth - 0.001))
             {
                 newDepthMap[newX, newY] = newZ;
             }
@@ -286,13 +284,11 @@ namespace KinectProject.Windows
         private void RenderHandler(object sender, FrameEventArgs e)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit |
-                     ClearBufferMask.DepthBufferBit |
-                     ClearBufferMask.StencilBufferBit);
-
-            var lookat = Matrix4.LookAt(Eye, Target, Up);
-
+                     ClearBufferMask.StencilBufferBit
+                |ClearBufferMask.DepthBufferBit );
+            var lookAtMatrix = Matrix4.LookAt(Eye, Target, Up);
             GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref lookat);            
+            GL.LoadMatrix(ref lookAtMatrix);            
             DrawObjectsByStage();
             Context.SwapBuffers();
         }
@@ -352,9 +348,8 @@ namespace KinectProject.Windows
             }
             if (status != WindowStatus.ScanDataStage) return;
             var voxels = _scannedObject.Vertices.ToVoxels();
-            MarchingCubes.SetModeToCubes();
-            _mesh = MarchingCubes.CreateMesh(voxels);               
-
+            MarchingRects.SetModeToRects();
+            _mesh = MarchingRects.CreateMesh(voxels);               
             status = WindowStatus.DisplayModelStage;
         }
     }

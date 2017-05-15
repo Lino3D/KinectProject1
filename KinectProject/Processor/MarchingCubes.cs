@@ -8,11 +8,11 @@ using KinectProject.Geometry;
 
 namespace KinectProject.Processor
 {
-    public static class MarchingCubes
+    public static class MarchingRects
     {
         #region Definitions
-        //Function poiter to what mode to use, cubes or tetrahedrons
-        private static MODE_FUNC Mode_Func = MarchCube;
+        //Function poiter to what mode to use, Rects or tetrahedrons
+        private static MODE_FUNC Mode_Func = MarchRect;
         //Target is the value that represents the surface of mesh
         //For example a range of -1 to 1, 0 would be the mid point were we want the surface to cut through
         //The target value does not have to be the mid point it can be any value with in the range
@@ -20,7 +20,7 @@ namespace KinectProject.Processor
         //Winding order of triangles use 2,1,0 or 0,1,2
         private static int[] windingOrder = { 0, 1, 2 };
 
-        // vertexOffset lists the positions, relative to vertex0, of each of the 8 vertices of a cube
+        // vertexOffset lists the positions, relative to vertex0, of each of the 8 vertices of a Rect
         // vertexOffset[8][3]
         private static readonly int[,] vertexOffset =
         {
@@ -28,7 +28,7 @@ namespace KinectProject.Processor
             {0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}
         };
 
-        // edgeConnection lists the index of the endpoint vertices for each of the 12 edges of the cube
+        // edgeConnection lists the index of the endpoint vertices for each of the 12 edges of the Rect
         // edgeConnection[12][2]
         private static readonly int[,] edgeConnection =
         {
@@ -37,7 +37,7 @@ namespace KinectProject.Processor
             {0, 4}, {1, 5}, {2, 6}, {3, 7}
         };
 
-        // edgeDirection lists the direction vector (vertex1-vertex0) for each edge in the cube
+        // edgeDirection lists the direction vector (vertex1-vertex0) for each edge in the Rect
         // edgeDirection[12][3]
         private static readonly float[,] edgeDirection =
         {
@@ -53,10 +53,10 @@ namespace KinectProject.Processor
             {0, 1}, {1, 2}, {2, 0}, {0, 3}, {1, 3}, {2, 3}
         };
 
-        // tetrahedronEdgeConnection lists the index of verticies from a cube 
-        // that made up each of the six tetrahedrons within the cube
-        // tetrahedronsInACube[6][4]
-        private static readonly int[,] tetrahedronsInACube =
+        // tetrahedronEdgeConnection lists the index of verticies from a Rect 
+        // that made up each of the six tetrahedrons within the Rect
+        // tetrahedronsInARect[6][4]
+        private static readonly int[,] tetrahedronsInARect =
         {
             {0, 5, 1, 6},
             {0, 1, 2, 6},
@@ -104,12 +104,12 @@ namespace KinectProject.Processor
 
         // For any edge, if one vertex is inside of the surface and the other is outside of the surface
         //  then the edge intersects the surface
-        // For each of the 8 vertices of the cube can be two possible states : either inside or outside of the surface
-        // For any cube the are 2^8=256 possible sets of vertex states
+        // For each of the 8 vertices of the Rect can be two possible states : either inside or outside of the surface
+        // For any Rect the are 2^8=256 possible sets of vertex states
         // This table lists the edges intersected by the surface for all 256 possible vertex states
         // There are 12 edges.  For each entry in the table, if edge #n is intersected, then bit #n is set to 1
-        // cubeEdgeFlags[256]
-        private static readonly int[] cubeEdgeFlags =
+        // RectEdgeFlags[256]
+        private static readonly int[] RectEdgeFlags =
         {
             0x000, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09,
             0xf00,
@@ -145,11 +145,11 @@ namespace KinectProject.Processor
             0x000
         };
 
-        //  For each of the possible vertex states listed in cubeEdgeFlags there is a specific triangulation
+        //  For each of the possible vertex states listed in RectEdgeFlags there is a specific triangulation
         //  of the edge intersection points.  triangleConnectionTable lists all of them in the form of
         //  0-5 edge triples with the list terminated by the invalid value -1.
         //  For example: triangleConnectionTable[3] list the 2 triangles formed when corner[0] 
-        //  and corner[1] are inside of the surface, but the rest of the cube is not.
+        //  and corner[1] are inside of the surface, but the rest of the Rect is not.
         //  triangleConnectionTable[256][16]
         private static readonly int[,] triangleConnectionTable =
         {
@@ -413,10 +413,10 @@ namespace KinectProject.Processor
         #endregion
 
         //Set the mode to use
-        //Cubes is faster and creates less verts, tetrahedrons is slower and creates more verts but better represents the mesh surface
-        public static void SetModeToCubes()
+        //Rects is faster and creates less verts, tetrahedrons is slower and creates more verts but better represents the mesh surface
+        public static void SetModeToRects()
         {
-            Mode_Func = MarchCube;
+            Mode_Func = MarchRect;
         }
 
 
@@ -425,7 +425,7 @@ namespace KinectProject.Processor
             var verts = new List<Vector3>();
             var index = new List<int>();
 
-            var cube = new float[8];
+            var Rect = new float[8];
 
             for (var x = 0; x < voxels.GetLength(0) - 1; x++)
             {
@@ -433,10 +433,10 @@ namespace KinectProject.Processor
                 {
                     for (var z = 0; z < voxels.GetLength(2) - 1; z++)
                     {
-                        //Get the values in the 8 neighbours which make up a cube
-                        FillCube(x, y, z, voxels, cube);
+                        //Get the values in the 8 neighbours which make up a Rect
+                        FillRect(x, y, z, voxels, Rect);
                         //Perform algorithm
-                        Mode_Func(new Vector3(x, y, z), cube, verts, index);
+                        Mode_Func(new Vector3(x, y, z), Rect, verts, index);
                     }
                 }
             }
@@ -451,10 +451,10 @@ namespace KinectProject.Processor
             return mesh;
         }
 
-        private static void FillCube(int x, int y, int z, float[,,] voxels, float[] cube)
+        private static void FillRect(int x, int y, int z, float[,,] voxels, float[] Rect)
         {
             for (var i = 0; i < 8; i++)
-                cube[i] = voxels[x + vertexOffset[i, 0], y + vertexOffset[i, 1], z + vertexOffset[i, 2]];
+                Rect[i] = voxels[x + vertexOffset[i, 0], y + vertexOffset[i, 1], z + vertexOffset[i, 2]];
         }
 
         // GetOffset finds the approximate point of intersection of the surface
@@ -465,8 +465,8 @@ namespace KinectProject.Processor
             return (delta == 0.0f) ? 0.5f : (target - v1) / delta;
         }
 
-        //MarchCube performs the Marching Cubes algorithm on a single cube
-        private static void MarchCube(Vector3 pos, float[] cube, List<Vector3> vertList, List<int> indexList)
+        //MarchRect performs the Marching Rects algorithm on a single Rect
+        private static void MarchRect(Vector3 pos, float[] Rect, List<Vector3> vertList, List<int> indexList)
         {
             int i;
             var flagIndex = 0;
@@ -474,12 +474,12 @@ namespace KinectProject.Processor
             var edgeVertex = new Vector3[12];
 
             //Find which vertices are inside of the surface and which are outside
-            for (i = 0; i < 8; i++) if (cube[i] <= target) flagIndex |= 1 << i;
+            for (i = 0; i < 8; i++) if (Rect[i] <= target) flagIndex |= 1 << i;
 
             //Find which edges are intersected by the surface
-            var edgeFlags = cubeEdgeFlags[flagIndex];
+            var edgeFlags = RectEdgeFlags[flagIndex];
 
-            //If the cube is entirely inside or outside of the surface, then there will be no intersections
+            //If the Rect is entirely inside or outside of the surface, then there will be no intersections
             if (edgeFlags == 0) return;
 
             //Find the point of intersection of the surface with each edge
@@ -488,7 +488,7 @@ namespace KinectProject.Processor
                 //if there is an intersection on this edge
                 if ((edgeFlags & (1 << i)) != 0)
                 {
-                    var offset = GetOffset(cube[edgeConnection[i, 0]], cube[edgeConnection[i, 1]]);
+                    var offset = GetOffset(Rect[edgeConnection[i, 0]], Rect[edgeConnection[i, 1]]);
 
                     edgeVertex[i].X = pos.X + (vertexOffset[edgeConnection[i, 0], 0] + offset * edgeDirection[i, 0]);
                     edgeVertex[i].Y = pos.Y + (vertexOffset[edgeConnection[i, 0], 1] + offset * edgeDirection[i, 1]);
@@ -496,7 +496,7 @@ namespace KinectProject.Processor
                 }
             }
 
-            //Save the triangles that were found. There can be up to five per cube
+            //Save the triangles that were found. There can be up to five per Rect
             for (i = 0; i < 5; i++)
             {
                 if (triangleConnectionTable[flagIndex, 3 * i] < 0) break;
@@ -516,6 +516,6 @@ namespace KinectProject.Processor
 
 
         //Function delegates, makes using functions pointers easier
-        private delegate void MODE_FUNC(Vector3 pos, float[] cube, List<Vector3> vertList, List<int> indexList);
+        private delegate void MODE_FUNC(Vector3 pos, float[] Rect, List<Vector3> vertList, List<int> indexList);
     }
 }
