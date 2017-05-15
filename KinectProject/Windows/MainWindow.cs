@@ -40,9 +40,10 @@ namespace KinectProject.Windows
         private double[,] _depthMap;
         private List<DrawablePoint3D> _depthPoints;
         public static KinectSensor Sensor;
-        private List<DepthData> _depthDataList = new List<DepthData>();
+        private List<ObjectInfo> _depthDataList = new List<ObjectInfo>();
         private Geometry.Rectangle _referenceRectangle;
         private Geometry.Rectangle _scannedObject;
+        private Geometry.Rectangle _mainRectangle;
         private int _kinectDepthImageHeight;
         private int _kinectDepthImageWidth;
         private const int _rectSize = 120;
@@ -151,14 +152,60 @@ namespace KinectProject.Windows
 
         private void ScanObject()
         {
-            var depthData = new DepthData
+            var depthData = new ObjectInfo
             {
                 DepthMap = _depthMap,
-                Rect = _scannedObject ?? _referenceRectangle
+                ObjectGeometry = _scannedObject ?? _referenceRectangle
             };
             _depthDataList.Add(depthData);
-            _scannedObject = DepthData.ProcessData(_depthDataList);
+            if (_depthDataList.Count == 1)
+                _mainRectangle = _depthDataList.FirstOrDefault()?.ObjectGeometry;
+            _scannedObject = ProcessData();
 
+        }
+        private Geometry.Rectangle ProcessData()
+        {
+ 
+            var lengthX = _mainRectangle.Vertices.GetLength(0);
+            var lengthY = _mainRectangle.Vertices.GetLength(1);
+            var lengthZ = _mainRectangle.Vertices.GetLength(2);
+
+            var result = new Geometry.Rectangle
+            {
+                Center = _mainRectangle.Center,
+                Vertices = new DrawablePoint3D[lengthX, lengthY, lengthZ]
+            };
+
+            for (var x = 0; x < lengthX; x++)
+            {
+                for (var y = 0; y < lengthY; y++)
+                {
+                    for (var z = 0; z < lengthZ; z++)
+                    {
+                        result.Vertices[x, y, z] = (DrawablePoint3D)_mainRectangle.Vertices[x, y, z].Clone();
+                        result.Vertices[x, y, z].DrawPoint = true;
+                    }
+                }
+            }
+
+            foreach (var depthData in _depthDataList)
+            {
+                for (var x = 0; x < lengthX; x++)
+                {
+                    for (var y = 0; y < lengthY; y++)
+                    {
+                        for (var z = 0; z < lengthZ; z++)
+                        {
+                            var rectVertex = depthData.ObjectGeometry.Vertices[x, y, z];
+                            if (!rectVertex.InRectDepth() || rectVertex.Z < depthData.DepthMap[(int)rectVertex.X, (int)rectVertex.Y])
+                            {
+                                result.Vertices[x, y, z].DrawPoint = false;
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
         }
 
 

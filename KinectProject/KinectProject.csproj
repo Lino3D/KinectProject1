@@ -51,7 +51,7 @@
     <Compile Include="Helpers\Helpers.cs" />
     <Compile Include="Geometry\Rectangle.cs" />
     <Compile Include="Geometry\DrawablePoint3D.cs" />
-    <Compile Include="Geometry\DepthData.cs" />
+    <Compile Include="Geometry\ObjectInfo.cs" />
     <Compile Include="Geometry\Mesh.cs" />
     <Compile Include="Processor\MarchingCubes.cs" />
     <Compile Include="Program.cs" />
