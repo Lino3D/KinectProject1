@@ -29,7 +29,7 @@ namespace KinectProject.Helpers
                 X = drawablePoint3D.X + shift.X,
                 Y = drawablePoint3D.Y + shift.Y,
                 Z = drawablePoint3D.Z + shift.Z,
-                DrawPoint = drawablePoint3D.DrawPoint,
+                DrawFlag = drawablePoint3D.DrawFlag,
             };
         }
 
@@ -77,7 +77,7 @@ namespace KinectProject.Helpers
                         if (drawAll ||
                             (
                                 (vertex.InRectDepth()) 
-                                && vertex.DrawPoint 
+                                && vertex.DrawFlag 
                             )
                         )
                             vertex.DrawWithShift();
@@ -100,7 +100,7 @@ namespace KinectProject.Helpers
                 {
                     for (var z = 0; z < lengthZ; z++)
                     {
-                        voxels[x, y, z] = vertices[x, y, z].DrawPoint ? 1 : 0;
+                        voxels[x, y, z] = vertices[x, y, z].DrawFlag ? 1 : 0;
                     }
                 }
             }

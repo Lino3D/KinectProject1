@@ -77,7 +77,7 @@ namespace KinectProject.Windows
                             X = x,
                             Y = y,
                             Z = z,
-                            DrawPoint = true,
+                            DrawFlag = true,
                         };
                     }
                 }
@@ -170,11 +170,40 @@ namespace KinectProject.Windows
         }
         private Geometry.Rectangle ProcessData()
         {
- 
+
             var lengthX = _mainRectangle.Vertices.GetLength(0);
             var lengthY = _mainRectangle.Vertices.GetLength(1);
             var lengthZ = _mainRectangle.Vertices.GetLength(2);
 
+            var result = CopyGeometry(lengthX, lengthY, lengthZ);
+
+            SetDrawFlag(lengthX, lengthY, lengthZ, result);
+            return result;
+        }
+
+        private void SetDrawFlag(int lengthX, int lengthY, int lengthZ, Geometry.Rectangle result)
+        {
+            foreach (var depthData in _depthDataList)
+            {
+                for (var x = 0; x < lengthX; x++)
+                {
+                    for (var y = 0; y < lengthY; y++)
+                    {
+                        for (var z = 0; z < lengthZ; z++)
+                        {
+                            var rectVertex = depthData.ObjectGeometry.Vertices[x, y, z];
+                            if (!rectVertex.InRectDepth() || rectVertex.Z < depthData.DepthMap[(int)rectVertex.X, (int)rectVertex.Y])
+                            {
+                                result.Vertices[x, y, z].DrawFlag = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private Geometry.Rectangle CopyGeometry(int lengthX, int lengthY, int lengthZ)
+        {
             var result = new Geometry.Rectangle
             {
                 Center = _mainRectangle.Center,
@@ -188,31 +217,13 @@ namespace KinectProject.Windows
                     for (var z = 0; z < lengthZ; z++)
                     {
                         result.Vertices[x, y, z] = (DrawablePoint3D)_mainRectangle.Vertices[x, y, z].Clone();
-                        result.Vertices[x, y, z].DrawPoint = true;
+                        result.Vertices[x, y, z].DrawFlag = true;
                     }
                 }
             }
 
-            foreach (var depthData in _depthDataList)
-            {
-                for (var x = 0; x < lengthX; x++)
-                {
-                    for (var y = 0; y < lengthY; y++)
-                    {
-                        for (var z = 0; z < lengthZ; z++)
-                        {
-                            var rectVertex = depthData.ObjectGeometry.Vertices[x, y, z];
-                            if (!rectVertex.InRectDepth() || rectVertex.Z < depthData.DepthMap[(int)rectVertex.X, (int)rectVertex.Y])
-                            {
-                                result.Vertices[x, y, z].DrawPoint = false;
-                            }
-                        }
-                    }
-                }
-            }
             return result;
         }
-
 
         private void OnLoad(object sender, EventArgs e)
         {
@@ -272,7 +283,7 @@ namespace KinectProject.Windows
                         X = newX,
                         Y = newY,
                         Z = newZ,
-                        DrawPoint = true
+                        DrawFlag = true
                     };
                     depthPoints.Add(cp);
 

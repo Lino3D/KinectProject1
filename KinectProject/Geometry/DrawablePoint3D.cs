@@ -8,7 +8,7 @@ namespace KinectProject.Geometry
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
-        public bool DrawPoint { get; set; }
+        public bool DrawFlag { get; set; }
         public object Clone()
         {
             return this.MemberwiseClone();
