@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using KinectProject.Geometry;
 using KinectProject.Helpers;
@@ -16,7 +17,6 @@ namespace KinectProject.Windows
 {
     public class MainWindow : GameWindow
     {
-        private const bool DebugWithoutKinect = true;
         private const float RotateAngleStep = 0.01f;
         private WindowStatus status = WindowStatus.ScanDataStage;
         public const double KinectFocalLength = 0.00173667;
@@ -37,10 +37,9 @@ namespace KinectProject.Windows
         private double[,] _depthMap;
         private List<DrawablePoint3D> _depthPoints;
         public static KinectSensor Sensor;
-        private List<DepthData> _datas = new List<DepthData>();
-        private Geometry.Rectangle _fullCube;
-        private Geometry.Rectangle _scannedItem;
-        private Geometry.Rectangle _actualPreview;
+        private List<DepthData> _depthDataList = new List<DepthData>();
+        private Geometry.Rectangle _referenceRectangle;
+        private Geometry.Rectangle _scannedObject;
         private int _kinectDepthImageHeight;
         private int _kinectDepthImageWidth;
         readonly int _widthSize =  120 ;
@@ -60,7 +59,7 @@ namespace KinectProject.Windows
             this.KeyUp += OnKeyUp;
             this.Context.SwapInterval = 1;
 
-            _fullCube = new Geometry.Rectangle
+            _referenceRectangle = new Geometry.Rectangle
             {
                 Center = new Vector3(
                     Constants.Constants.HalfCubeWidth,
@@ -74,7 +73,7 @@ namespace KinectProject.Windows
                 {
                     for (var z = 0; z < _depthSize; z++)
                     {
-                        _fullCube.Vertices[x, y, z] = new DrawablePoint3D
+                        _referenceRectangle.Vertices[x, y, z] = new DrawablePoint3D
                         {
                             X = x,
                             Y = y,
@@ -114,42 +113,38 @@ namespace KinectProject.Windows
         }
         private void OnKeyUp(object sender, KeyboardKeyEventArgs e)
         {
-            if (e.Key == Key.Escape)
-            {
-                Exit();
-            }
-
-            if (e.Key == Key.Space)
-            {
-                MakePreview();
-            }
 
             if (e.Key == Key.Enter)
             {
-                MakeSnapshot();
+                ScanObject();
             }
             
             if( e.Key == Key.C)
             {
-                SwitchDisplayModel();
+                SwitchToVoxels();
             }
 
             if (e.Key == Key.Left)
             {
-                RotateItem(0, MathHelper.DegreesToRadians(15), 0);
+                RotateScannedObject(0, MathHelper.DegreesToRadians(15), 0);
             }
 
             if (e.Key == Key.Right)
             {
-                RotateItem(0, MathHelper.DegreesToRadians(15), 0);
+                RotateScannedObject(0, MathHelper.DegreesToRadians(15), 0);
+            }
+
+            if (e.Key == Key.Escape)
+            {
+                Exit();
             }
         }
 
-        private void RotateItem(float angleX, float angleY, float angleZ)
+        private void RotateScannedObject(float angleX, float angleY, float angleZ)
         {
-            _fullCube.Rotate(angleX, angleY, angleZ);
-            if (_scannedItem != null)
-                _scannedItem.Rotate(angleX, angleY, angleZ);
+            _referenceRectangle.Rotate(angleX, angleY, angleZ);
+            if (_scannedObject != null)
+                _scannedObject.Rotate(angleX, angleY, angleZ);
         }
         
 
@@ -162,38 +157,18 @@ namespace KinectProject.Windows
             GL.LoadMatrix(ref Projection);
         }
 
-        private void MakeSnapshot()
+        private void ScanObject()
         {
             var data = new DepthData
             {
                 DepthMap = _depthMap,
-                Rect = _scannedItem ?? _fullCube
+                Rect = _scannedObject ?? _referenceRectangle
             };
-            _datas.Add(data);
-            _scannedItem = DepthData.ProcessData(_datas);
-            _actualPreview = null;
-            
-        }
-
-        private void MakePreview()
-        {
-            var data = new DepthData
-            {
-                DepthMap = _depthMap,
-                Rect = _scannedItem ?? _fullCube
-            };
-            var datasCopy = new List<DepthData>(_datas) { data };
-
-            _actualPreview = DepthData.ProcessData(datasCopy);
-        }
-
-        private void Create3DMesh()
-        {
-            var voxels = _scannedItem.Vertices.ToVoxels();
-            MarchingCubes.SetModeToCubes();
-            _mesh = MarchingCubes.CreateMesh(voxels);
+            _depthDataList.Add(data);
+            _scannedObject = DepthData.ProcessData(_depthDataList);
 
         }
+
 
         private void OnLoad(object sender, EventArgs e)
         {
@@ -204,7 +179,7 @@ namespace KinectProject.Windows
             if (Sensor == null) return;
             Sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
             Sensor.DepthFrameReady += SensorDepthFrameReady;
-
+            _depthPixels = new DepthImagePixel[Sensor.DepthStream.FramePixelDataLength];
             _kinectDepthImageWidth = Sensor.DepthStream.FrameWidth;
             _kinectDepthImageHeight = Sensor.DepthStream.FrameHeight;
 
@@ -212,7 +187,7 @@ namespace KinectProject.Windows
             {
                 Sensor.Start();
             }
-            catch (Exception)
+            catch (IOException)
             {
                 Sensor = null;
             }
@@ -223,8 +198,7 @@ namespace KinectProject.Windows
             using (var depthFrame = e.OpenDepthImageFrame())
             {
                 if (depthFrame == null) return;
-                _depthPixels = new DepthImagePixel[Sensor.DepthStream.FramePixelDataLength];
-                depthFrame.CopyDepthImagePixelDataTo(_depthPixels);
+                depthFrame.CopyDepthImagePixelDataTo(this._depthPixels);
             }
         } 
 
@@ -265,7 +239,6 @@ namespace KinectProject.Windows
             }
             _depthPoints = depthPoints;
             _depthMap = depthMap;
-
 
             // Update camera parameters
             Eye.X = (float)(Target.X + _radius * Math.Cos(_phi) * Math.Sin(_theta));
@@ -343,7 +316,7 @@ namespace KinectProject.Windows
             if (_mesh != null)
             {
                 GL.Color3(Color.White);
-                for (int i = 0; i < _mesh.Triangles.Length; i += 3)
+                for (var i = 0; i < _mesh.Triangles.Length; i += 3)
                 {
                     var v1 = _mesh.Vertices[_mesh.Triangles[i]];
                     var v2 = _mesh.Vertices[_mesh.Triangles[i + 1]];
@@ -353,43 +326,36 @@ namespace KinectProject.Windows
                 }
             }
 
-            if (_scannedItem == null) return;
+            if (_scannedObject == null) return;
             GL.Color3(Color.Orange);
-            _scannedItem.Draw();
+            _scannedObject.Draw();
         }
 
         private void DrawScanningStageObjects()
         {
-            if (_depthPoints != null)
-            {
-                GL.Color3(Color.White);
-                GL.Begin(PrimitiveType.Points);
+            if (_depthPoints == null) return;
+            GL.Color3(Color.White);
+            GL.Begin(PrimitiveType.Points);
 
-                for (var i = 0; i < _depthPoints.Count; i++ )
-                {
-                    if (_depthPoints[i] == null)
-                        continue;
-                    _depthPoints[i].DrawWithShift();
-                }
-                GL.End();
+            foreach (var point3D in _depthPoints)
+            {
+                point3D?.DrawWithShift();
             }
-            
+            GL.End();
         }
 
-        private void SwitchDisplayModel()
+        private void SwitchToVoxels()
         {
             if( status == WindowStatus.DisplayModelStage)
             {
                 status = WindowStatus.ScanDataStage;
             }
-            if( status == WindowStatus.ScanDataStage)
-            {
-                var voxels = _scannedItem.Vertices.ToVoxels();
-                MarchingCubes.SetModeToCubes();
-                _mesh = MarchingCubes.CreateMesh(voxels);               
+            if (status != WindowStatus.ScanDataStage) return;
+            var voxels = _scannedObject.Vertices.ToVoxels();
+            MarchingCubes.SetModeToCubes();
+            _mesh = MarchingCubes.CreateMesh(voxels);               
 
-                status = WindowStatus.DisplayModelStage;
-            }
+            status = WindowStatus.DisplayModelStage;
         }
     }
 }
