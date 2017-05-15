@@ -171,14 +171,14 @@ namespace KinectProject.Windows
             var data = new DepthData
             {
                 DepthMap = _depthMap,
-                Cube = _scannedItem ?? _fullCube
+                Rect = _scannedItem ?? _fullCube
             };
             _datas.Add(data);
             _scannedItem = DepthData.ProcessData(_datas);
             _actualPreview = null;
 
          //   if (SnapshotMade != null)
-         //       SnapshotMade(this, _datas, (Cube)_scannedItem.Clone());
+         //       SnapshotMade(this, _datas, (Rect)_scannedItem.Clone());
         }
 
         private void MakePreview()
@@ -186,7 +186,7 @@ namespace KinectProject.Windows
             var data = new DepthData
             {
                 DepthMap = _depthMap,
-                Cube = _scannedItem ?? _fullCube
+                Rect = _scannedItem ?? _fullCube
             };
             var datasCopy = new List<DepthData>(_datas) { data };
 

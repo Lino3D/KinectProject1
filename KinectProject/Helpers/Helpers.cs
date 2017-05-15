@@ -110,14 +110,14 @@ namespace KinectProject.Helpers
         public static void Draw(this Geometry.Rectangle actualCube, bool drawAll = false)
         {
             GL.Begin(PrimitiveType.Points);
-            var xLen = actualCube.Vertices.GetLength(0);
-            for (int x = 0; x < xLen; x++)
+            var lengthX = actualCube.Vertices.GetLength(0);
+            for (int x = 0; x < lengthX; x++)
             {
-                var yLen = actualCube.Vertices.GetLength(1);
-                for (int y = 0; y < yLen; y++)
+                var lengthY = actualCube.Vertices.GetLength(1);
+                for (int y = 0; y < lengthY; y++)
                 {
-                    var zLen = actualCube.Vertices.GetLength(2);
-                    for (int z = 0; z < zLen; z++)
+                    var lengthZ = actualCube.Vertices.GetLength(2);
+                    for (int z = 0; z < lengthZ; z++)
                     {
                         var vertex = actualCube.Vertices[x, y, z];
                         if (drawAll ||
@@ -143,15 +143,15 @@ namespace KinectProject.Helpers
 
         public static float[,,] ToVoxels(this DrawablePoint3D[,,] vertices)
         {
-            var xLen = vertices.GetLength(0);
-            var yLen = vertices.GetLength(1);
-            var zLen = vertices.GetLength(2);
-            float[,,] voxels = new float[xLen,yLen,zLen];
-            for (int x = 0; x < xLen; x++)
+            var lengthX = vertices.GetLength(0);
+            var lengthY = vertices.GetLength(1);
+            var lengthZ = vertices.GetLength(2);
+            float[,,] voxels = new float[lengthX,lengthY,lengthZ];
+            for (int x = 0; x < lengthX; x++)
             {
-                for (int y = 0; y < yLen; y++)
+                for (int y = 0; y < lengthY; y++)
                 {
-                    for (int z = 0; z < zLen; z++)
+                    for (int z = 0; z < lengthZ; z++)
                     {
                         voxels[x, y, z] = vertices[x, y, z].DrawPoint ? 1 : 0;
                     }

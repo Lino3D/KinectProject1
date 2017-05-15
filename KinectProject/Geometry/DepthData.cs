@@ -9,58 +9,55 @@ namespace KinectProject.Geometry
 {
     public class DepthData
     {
-        public Rectangle Cube { get; set; }
+        public Rectangle Rect { get; set; }
         public double[,] DepthMap { get; set; }
 
-        public static Rectangle ProcessData(List<DepthData> datas)
+        public static Rectangle ProcessData(List<DepthData> depthDataList)
         {
-            var first = datas.FirstOrDefault();
-            if (first != null)
+            var first = depthDataList.FirstOrDefault();
+            if (first == null) return null;
+            var firstRectangle = first.Rect;
+            var lengthX = firstRectangle.Vertices.GetLength(0);
+            var lengthY = firstRectangle.Vertices.GetLength(1);
+            var lengthZ = firstRectangle.Vertices.GetLength(2);
+
+            var result = new Rectangle
             {
-                var firstRectangle = first.Cube;
-                var xLen = firstRectangle.Vertices.GetLength(0);
-                var yLen = firstRectangle.Vertices.GetLength(1);
-                var zLen = firstRectangle.Vertices.GetLength(2);
+                Center = firstRectangle.Center,
+                Vertices = new DrawablePoint3D[lengthX, lengthY, lengthZ]
+            };
 
-                var result = new Rectangle
+            for (var x = 0; x < lengthX; x++)
+            {
+                for (var y = 0; y < lengthY; y++)
                 {
-                    Center = firstRectangle.Center,
-                    Vertices = new DrawablePoint3D[xLen, yLen, zLen]
-                };
-
-                for (var x = 0; x < xLen; x++)
-                {
-                    for (var y = 0; y < yLen; y++)
+                    for (var z = 0; z < lengthZ; z++)
                     {
-                        for (var z = 0; z < zLen; z++)
-                        {
-                            result.Vertices[x, y, z] = (DrawablePoint3D)firstRectangle.Vertices[x, y, z].Clone();
-                            result.Vertices[x, y, z].DrawPoint = true;
-                        }
+                        result.Vertices[x, y, z] = (DrawablePoint3D)firstRectangle.Vertices[x, y, z].Clone();
+                        result.Vertices[x, y, z].DrawPoint = true;
                     }
                 }
+            }
 
-                foreach (var data in datas)
+            foreach (var depthData in depthDataList)
+            {
+                for (var x = 0; x < lengthX; x++)
                 {
-                    for (var x = 0; x < xLen; x++)
+                    for (var y = 0; y < lengthY; y++)
                     {
-                        for (var y = 0; y < yLen; y++)
+                        for (var z = 0; z < lengthZ; z++)
                         {
-                            for (var z = 0; z < zLen; z++)
+                            var rectVertex = depthData.Rect.Vertices[x, y, z];
+                            if (rectVertex.NotInCube() ||
+                                rectVertex.Z < depthData.DepthMap[(int)rectVertex.X, (int)rectVertex.Y])
                             {
-                                var cubePoint = data.Cube.Vertices[x, y, z];
-                                if (cubePoint.NotInCube() ||
-                                    cubePoint.Z < data.DepthMap[(int)cubePoint.X, (int)cubePoint.Y])
-                                {
-                                    result.Vertices[x, y, z].DrawPoint = false;
-                                }
+                                result.Vertices[x, y, z].DrawPoint = false;
                             }
                         }
                     }
                 }
-                return result;
             }
-            return null;
+            return result;
         }
     }
 }
