@@ -1,5 +1,6 @@
 ﻿using System;
 using OpenTK;
+using OpenTK.Graphics.ES10;
 
 namespace KinectProject.Geometry
 {
@@ -20,9 +21,12 @@ namespace KinectProject.Geometry
             {
                 var result = new Vector3((float)point.X, (float)point.Y, (float)point.Z);
                 result -= Center;
-                Vector3.Transform(ref result, ref rotationX, out result);
-                Vector3.Transform(ref result, ref rotationY, out result);
-                Vector3.Transform(ref result, ref rotationZ, out result);
+                //Vector3.Transform(result, rotationX, out result);
+                //Vector3.Transform(result, rotationY, out result);
+                //Vector3.Transform(result, rotationZ, out result);
+                result = Vector3.Transform( result, rotationX);
+                result = Vector3.Transform(result, rotationY);
+                result = Vector3.Transform(result, rotationZ);
                 result += Center;
                 point.X = result.X;
                 point.Y = result.Y;

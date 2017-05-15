@@ -42,9 +42,7 @@ namespace KinectProject.Windows
         private Geometry.Rectangle _scannedObject;
         private int _kinectDepthImageHeight;
         private int _kinectDepthImageWidth;
-        private int _widthSize =  120 ;
-        private int _heightSize = 120;
-        private int _depthSize = 120;
+        private const int _rectSize = 120;
 
         public MainWindow()
             : base(800, 600)
@@ -65,13 +63,13 @@ namespace KinectProject.Windows
                     Constants.Constants.HalfRectWidth,
                     Constants.Constants.HalfRectHeight,
                     Constants.Constants.HalfRectDepth),
-                Vertices = new DrawablePoint3D[_widthSize, _heightSize, _depthSize]
+                Vertices = new DrawablePoint3D[_rectSize, _rectSize, _rectSize]
             };
-            for (var x = 0; x < _widthSize; x++)
+            for (var x = 0; x < _rectSize; x++)
             {
-                for (var y = 0; y < _heightSize; y++)
+                for (var y = 0; y < _rectSize; y++)
                 {
-                    for (var z = 0; z < _depthSize; z++)
+                    for (var z = 0; z < _rectSize; z++)
                     {
                         _referenceRectangle.Vertices[x, y, z] = new DrawablePoint3D
                         {
@@ -126,12 +124,12 @@ namespace KinectProject.Windows
 
             if (e.Key == Key.Left)
             {
-                RotateScannedObject(0, MathHelper.DegreesToRadians(15), 0);
+                RotateScannedObject(0, MathHelper.DegreesToRadians(20), 0);
             }
 
             if (e.Key == Key.Right)
             {
-                RotateScannedObject(0, MathHelper.DegreesToRadians(15), 0);
+                RotateScannedObject(0, MathHelper.DegreesToRadians(20), 0);
             }
 
             if (e.Key == Key.Escape)
@@ -158,12 +156,12 @@ namespace KinectProject.Windows
 
         private void ScanObject()
         {
-            var data = new DepthData
+            var depthData = new DepthData
             {
                 DepthMap = _depthMap,
                 Rect = _scannedObject ?? _referenceRectangle
             };
-            _depthDataList.Add(data);
+            _depthDataList.Add(depthData);
             _scannedObject = DepthData.ProcessData(_depthDataList);
 
         }
@@ -172,9 +170,7 @@ namespace KinectProject.Windows
         private void OnLoad(object sender, EventArgs e)
         {
             GL.Enable(EnableCap.DepthTest);
-
             Sensor = KinectSensor.KinectSensors.FirstOrDefault(x => x.Status == KinectStatus.Connected);
-
             if (Sensor == null) return;
             Sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
             Sensor.DepthFrameReady += SensorDepthFrameReady;
@@ -209,7 +205,7 @@ namespace KinectProject.Windows
                 return; 
 
             var depthPoints = new List<DrawablePoint3D>();
-            var depthMap = new double[_widthSize, _heightSize];
+            var depthMap = new double[_rectSize, _rectSize];
             CleanDepthMap(depthMap);
 
             for (var y = 0; y < _kinectDepthImageHeight; y++)
@@ -272,9 +268,9 @@ namespace KinectProject.Windows
 
         private void CleanDepthMap(double[,] newDepthMap)
         {
-            for (var x = 0; x < _widthSize; x++)
+            for (var x = 0; x < _rectSize; x++)
             {
-                for (var y = 0; y < _heightSize; y++)
+                for (var y = 0; y < _rectSize; y++)
                 {
                     newDepthMap[x, y] = double.MaxValue;
                 }
