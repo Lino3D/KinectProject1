@@ -20,7 +20,7 @@ namespace KinectProject.Processor
         //Winding order of triangles use 2,1,0 or 0,1,2
         private static int[] windingOrder = { 0, 1, 2 };
 
-        // vertexOffset lists the positions, relative to vertex0, of each of the 8 vertices of a Rect
+        // vertexOffset lists the positions, relative to vertex0, of each of the 8 vertices of a ObjectGeometry
         // vertexOffset[8][3]
         private static readonly int[,] vertexOffset =
         {
@@ -28,7 +28,7 @@ namespace KinectProject.Processor
             {0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}
         };
 
-        // edgeConnection lists the index of the endpoint vertices for each of the 12 edges of the Rect
+        // edgeConnection lists the index of the endpoint vertices for each of the 12 edges of the ObjectGeometry
         // edgeConnection[12][2]
         private static readonly int[,] edgeConnection =
         {
@@ -37,7 +37,7 @@ namespace KinectProject.Processor
             {0, 4}, {1, 5}, {2, 6}, {3, 7}
         };
 
-        // edgeDirection lists the direction vector (vertex1-vertex0) for each edge in the Rect
+        // edgeDirection lists the direction vector (vertex1-vertex0) for each edge in the ObjectGeometry
         // edgeDirection[12][3]
         private static readonly float[,] edgeDirection =
         {
@@ -53,8 +53,8 @@ namespace KinectProject.Processor
             {0, 1}, {1, 2}, {2, 0}, {0, 3}, {1, 3}, {2, 3}
         };
 
-        // tetrahedronEdgeConnection lists the index of verticies from a Rect 
-        // that made up each of the six tetrahedrons within the Rect
+        // tetrahedronEdgeConnection lists the index of verticies from a ObjectGeometry 
+        // that made up each of the six tetrahedrons within the ObjectGeometry
         // tetrahedronsInARect[6][4]
         private static readonly int[,] tetrahedronsInARect =
         {
@@ -104,8 +104,8 @@ namespace KinectProject.Processor
 
         // For any edge, if one vertex is inside of the surface and the other is outside of the surface
         //  then the edge intersects the surface
-        // For each of the 8 vertices of the Rect can be two possible states : either inside or outside of the surface
-        // For any Rect the are 2^8=256 possible sets of vertex states
+        // For each of the 8 vertices of the ObjectGeometry can be two possible states : either inside or outside of the surface
+        // For any ObjectGeometry the are 2^8=256 possible sets of vertex states
         // This table lists the edges intersected by the surface for all 256 possible vertex states
         // There are 12 edges.  For each entry in the table, if edge #n is intersected, then bit #n is set to 1
         // RectEdgeFlags[256]
@@ -149,7 +149,7 @@ namespace KinectProject.Processor
         //  of the edge intersection points.  triangleConnectionTable lists all of them in the form of
         //  0-5 edge triples with the list terminated by the invalid value -1.
         //  For example: triangleConnectionTable[3] list the 2 triangles formed when corner[0] 
-        //  and corner[1] are inside of the surface, but the rest of the Rect is not.
+        //  and corner[1] are inside of the surface, but the rest of the ObjectGeometry is not.
         //  triangleConnectionTable[256][16]
         private static readonly int[,] triangleConnectionTable =
         {
@@ -433,7 +433,7 @@ namespace KinectProject.Processor
                 {
                     for (var z = 0; z < voxels.GetLength(2) - 1; z++)
                     {
-                        //Get the values in the 8 neighbours which make up a Rect
+                        //Get the values in the 8 neighbours which make up a ObjectGeometry
                         FillRect(x, y, z, voxels, Rect);
                         //Perform algorithm
                         Mode_Func(new Vector3(x, y, z), Rect, verts, index);
@@ -465,7 +465,7 @@ namespace KinectProject.Processor
             return (delta == 0.0f) ? 0.5f : (target - v1) / delta;
         }
 
-        //MarchRect performs the Marching Rects algorithm on a single Rect
+        //MarchRect performs the Marching Rects algorithm on a single ObjectGeometry
         private static void MarchRect(Vector3 pos, float[] Rect, List<Vector3> vertList, List<int> indexList)
         {
             int i;
@@ -479,7 +479,7 @@ namespace KinectProject.Processor
             //Find which edges are intersected by the surface
             var edgeFlags = RectEdgeFlags[flagIndex];
 
-            //If the Rect is entirely inside or outside of the surface, then there will be no intersections
+            //If the ObjectGeometry is entirely inside or outside of the surface, then there will be no intersections
             if (edgeFlags == 0) return;
 
             //Find the point of intersection of the surface with each edge
@@ -496,7 +496,7 @@ namespace KinectProject.Processor
                 }
             }
 
-            //Save the triangles that were found. There can be up to five per Rect
+            //Save the triangles that were found. There can be up to five per ObjectGeometry
             for (i = 0; i < 5; i++)
             {
                 if (triangleConnectionTable[flagIndex, 3 * i] < 0) break;
