@@ -32,11 +32,7 @@ namespace KinectProject.Helpers
                 DrawPoint = drawablePoint3D.DrawPoint,
             };
         }
-
-        public static bool NotInCube(this DrawablePoint3D p)
-        {
-            return !p.InCube();
-        }
+        
 
         public static bool InCube(this DrawablePoint3D p)
         {

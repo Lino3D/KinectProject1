@@ -27,7 +27,7 @@ namespace KinectProject.Windows
         protected Matrix4 Projection;
         private double _radius = 160;
         private double _theta = Math.PI;
-        private bool _mouseCaptured;        
+        private bool _mouseCaptured;
         private int _prevX;
         private int _prevY;
 
@@ -42,14 +42,14 @@ namespace KinectProject.Windows
         private Geometry.Rectangle _scannedObject;
         private int _kinectDepthImageHeight;
         private int _kinectDepthImageWidth;
-        readonly int _widthSize =  120 ;
+        readonly int _widthSize = 120;
         readonly int _heightSize = 120;
         readonly int _depthSize = 120;
 
         public MainWindow()
             : base(800, 600)
         {
-            this.Load += OnLoad;            
+            this.Load += OnLoad;
             Resize += ResizeHandler;
             this.UpdateFrame += UpdateHandler;
             this.RenderFrame += RenderHandler;
@@ -118,8 +118,8 @@ namespace KinectProject.Windows
             {
                 ScanObject();
             }
-            
-            if( e.Key == Key.C)
+
+            if (e.Key == Key.C)
             {
                 SwitchToVoxels();
             }
@@ -133,11 +133,6 @@ namespace KinectProject.Windows
             {
                 RotateScannedObject(0, MathHelper.DegreesToRadians(15), 0);
             }
-
-            if (e.Key == Key.Escape)
-            {
-                Exit();
-            }
         }
 
         private void RotateScannedObject(float angleX, float angleY, float angleZ)
@@ -146,7 +141,7 @@ namespace KinectProject.Windows
             if (_scannedObject != null)
                 _scannedObject.Rotate(angleX, angleY, angleZ);
         }
-        
+
 
         private void ResizeHandler(object sender, EventArgs e)
         {
@@ -200,14 +195,14 @@ namespace KinectProject.Windows
                 if (depthFrame == null) return;
                 depthFrame.CopyDepthImagePixelDataTo(this._depthPixels);
             }
-        } 
+        }
 
         private void UpdateHandler(object sender, FrameEventArgs e)
         {
             if (status != WindowStatus.ScanDataStage)
                 return;
-            if (_depthPixels == null) 
-                return; 
+            if (_depthPixels == null)
+                return;
 
             var depthPoints = new List<DrawablePoint3D>();
             var depthMap = new double[_widthSize, _heightSize];
@@ -217,12 +212,13 @@ namespace KinectProject.Windows
             {
                 for (var x = 0; x < _kinectDepthImageWidth; x++)
                 {
-                    var offset = x+ y * _kinectDepthImageWidth;
+                    var offset = x + y * _kinectDepthImageWidth;
                     var rawDepth = _depthPixels[offset].Depth;
                     if (Math.Abs(rawDepth) < 0.001) continue;
 
-                    var newX = (int) ((x - 320) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfCubeWidth);
-                    var newY = (int) ((-y + 240) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfCubeWidth);
+                    // TODO: constant
+                    var newX = (int)((x - 320) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfCubeWidth);
+                    var newY = (int)((-y + 240) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfCubeWidth);
                     double newZ = rawDepth / 10 - Constants.Constants.DistanceToCube;
 
                     var cp = new DrawablePoint3D()
@@ -292,14 +288,14 @@ namespace KinectProject.Windows
             var lookat = Matrix4.LookAt(Eye, Target, Up);
 
             GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref lookat);            
+            GL.LoadMatrix(ref lookat);
             DrawObjectsByStage();
             Context.SwapBuffers();
         }
 
         private void DrawObjectsByStage()
         {
-            switch( status)
+            switch (status)
             {
                 case WindowStatus.ScanDataStage:
                     DrawScanningStageObjects();
@@ -309,7 +305,7 @@ namespace KinectProject.Windows
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
-            }            
+            }
         }
         private void DrawModelDisplayStageObjects()
         {
@@ -346,14 +342,14 @@ namespace KinectProject.Windows
 
         private void SwitchToVoxels()
         {
-            if( status == WindowStatus.DisplayModelStage)
+            if (status == WindowStatus.DisplayModelStage)
             {
                 status = WindowStatus.ScanDataStage;
             }
             if (status != WindowStatus.ScanDataStage) return;
             var voxels = _scannedObject.Vertices.ToVoxels();
             MarchingCubes.SetModeToCubes();
-            _mesh = MarchingCubes.CreateMesh(voxels);               
+            _mesh = MarchingCubes.CreateMesh(voxels);
 
             status = WindowStatus.DisplayModelStage;
         }
