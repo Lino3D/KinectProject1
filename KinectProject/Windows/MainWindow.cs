@@ -151,11 +151,7 @@ namespace KinectProject.Windows
             if (_scannedItem != null)
                 _scannedItem.Rotate(angleX, angleY, angleZ);
         }
-
-        //private void ResetPreview()
-        //{
-        //    _actualPreview = null;
-        //}
+        
 
         private void ResizeHandler(object sender, EventArgs e)
         {
@@ -176,9 +172,7 @@ namespace KinectProject.Windows
             _datas.Add(data);
             _scannedItem = DepthData.ProcessData(_datas);
             _actualPreview = null;
-
-         //   if (SnapshotMade != null)
-         //       SnapshotMade(this, _datas, (Rect)_scannedItem.Clone());
+            
         }
 
         private void MakePreview()
@@ -251,7 +245,7 @@ namespace KinectProject.Windows
                 {
                     var offset = x+ y * _kinectDepthImageWidth;
                     var rawDepth = _depthPixels[offset].Depth;
-                    if (Math.Abs(rawDepth) < 10e-3) continue;
+                    if (Math.Abs(rawDepth) < 0.001) continue;
 
                     var newX = (int) ((x - 320) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfCubeWidth);
                     var newY = (int) ((-y + 240) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfCubeWidth);
@@ -294,7 +288,7 @@ namespace KinectProject.Windows
                 return;
             }
 
-            if (newDepthMap[newX, newY] <= 10e-3 || newDepthMap[newX, newY] >= (Constants.Constants.CubeDepth - 10e-3))
+            if (newDepthMap[newX, newY] <= 0.001 || newDepthMap[newX, newY] >= (Constants.Constants.CubeDepth - 0.001))
             {
                 newDepthMap[newX, newY] = newZ;
             }
@@ -380,16 +374,7 @@ namespace KinectProject.Windows
                 }
                 GL.End();
             }
-
-            if (_actualPreview != null)
-            {
-                GL.Color3(Color.Green);
-                _actualPreview.Draw();
-            }
-
-            if (_scannedItem == null) return;
-            GL.Color3(Color.Blue);
-            _scannedItem.Draw();
+            
         }
 
         private void SwitchDisplayModel()
