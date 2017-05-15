@@ -64,48 +64,7 @@ namespace KinectProject.Helpers
                    y >= 0 && y < Constants.Constants.CubeHeight;
         }
 
-        public static void DrawRect()
-        {
-            GL.Color3(Color.WhiteSmoke);
-
-            GL.Begin(PrimitiveType.Lines);
-            GL.Vertex3(Constants.Constants.RectCorners[0]);
-            GL.Vertex3(Constants.Constants.RectCorners[1]);
-
-            GL.Vertex3(Constants.Constants.RectCorners[0]);
-            GL.Vertex3(Constants.Constants.RectCorners[3]);
-
-            GL.Vertex3(Constants.Constants.RectCorners[0]);
-            GL.Vertex3(Constants.Constants.RectCorners[4]);
-
-            GL.Vertex3(Constants.Constants.RectCorners[1]);
-            GL.Vertex3(Constants.Constants.RectCorners[2]);
-
-            GL.Vertex3(Constants.Constants.RectCorners[1]);
-            GL.Vertex3(Constants.Constants.RectCorners[5]);
-
-            GL.Vertex3(Constants.Constants.RectCorners[2]);
-            GL.Vertex3(Constants.Constants.RectCorners[3]);
-
-            GL.Vertex3(Constants.Constants.RectCorners[2]);
-            GL.Vertex3(Constants.Constants.RectCorners[6]);
-
-            GL.Vertex3(Constants.Constants.RectCorners[3]);
-            GL.Vertex3(Constants.Constants.RectCorners[7]);
-
-            GL.Vertex3(Constants.Constants.RectCorners[4]);
-            GL.Vertex3(Constants.Constants.RectCorners[5]);
-
-            GL.Vertex3(Constants.Constants.RectCorners[4]);
-            GL.Vertex3(Constants.Constants.RectCorners[7]);
-
-            GL.Vertex3(Constants.Constants.RectCorners[5]);
-            GL.Vertex3(Constants.Constants.RectCorners[6]);
-
-            GL.Vertex3(Constants.Constants.RectCorners[6]);
-            GL.Vertex3(Constants.Constants.RectCorners[7]);
-            GL.End();
-        }
+       
 
         public static void Draw(this Geometry.Rectangle actualCube, bool drawAll = false)
         {
@@ -124,7 +83,6 @@ namespace KinectProject.Helpers
                             (
                                 (vertex.InCube()) 
                                 && vertex.DrawPoint 
-                                && ShouldDrawThisVertex(x, y, z)
                             )
                         )
                             vertex.DrawWithShift();
@@ -134,13 +92,7 @@ namespace KinectProject.Helpers
             GL.End();
         }
 
-        public static bool ShouldDrawThisVertex(int x, int y, int z)
-        {
-            return x % Constants.Constants.Skip == 0
-                && y % Constants.Constants.Skip == 0
-                && z % Constants.Constants.Skip == 0;
-        }
-
+        
         public static float[,,] ToVoxels(this DrawablePoint3D[,,] vertices)
         {
             var lengthX = vertices.GetLength(0);

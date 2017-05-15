@@ -319,8 +319,7 @@ namespace KinectProject.Windows
             var lookat = Matrix4.LookAt(Eye, Target, Up);
 
             GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref lookat);
-            Helpers.Helpers.DrawRect();
+            GL.LoadMatrix(ref lookat);            
             DrawObjectsByStage();
             Context.SwapBuffers();
         }
@@ -366,9 +365,9 @@ namespace KinectProject.Windows
                 GL.Color3(Color.White);
                 GL.Begin(PrimitiveType.Points);
 
-                for (var i = 0; i < _depthPoints.Count; i += Constants.Constants.Skip)
+                for (var i = 0; i < _depthPoints.Count; i++ )
                 {
-                    if (_depthPoints[i] == null) // || (!_depthPoints[i].InCube() && !Constants.Constants.DrawDepthImageOutsideBox))
+                    if (_depthPoints[i] == null)
                         continue;
                     _depthPoints[i].DrawWithShift();
                 }

@@ -13,7 +13,6 @@ namespace KinectProject.Constants
         #endregion
 
         #region Wyœwietlanie
-        public const int Skip = 3;
         public const bool ShowPointsOutsideBox = false;
         #endregion
 
@@ -30,17 +29,7 @@ namespace KinectProject.Constants
         public const float HalfCubeHeight = CubeHeight / 2;
         public const float HalfCubeDepth = CubeDepth / 2;
 
-        public static readonly Vector3[] RectCorners =
-        {
-            new Vector3(-HalfCubeWidth, -HalfCubeHeight, DistanceToCube),
-            new Vector3(HalfCubeWidth, -HalfCubeHeight, DistanceToCube),
-            new Vector3(HalfCubeWidth, HalfCubeHeight, DistanceToCube),
-            new Vector3(-HalfCubeWidth, HalfCubeHeight, DistanceToCube),
-            new Vector3(-HalfCubeWidth, -HalfCubeHeight, DistanceToCube + CubeDepth),
-            new Vector3(HalfCubeWidth, -HalfCubeHeight, DistanceToCube + CubeDepth),
-            new Vector3(HalfCubeWidth, HalfCubeHeight, DistanceToCube + CubeDepth),
-            new Vector3(-HalfCubeWidth, HalfCubeHeight, DistanceToCube + CubeDepth)
-        };
+   
 
 
 
