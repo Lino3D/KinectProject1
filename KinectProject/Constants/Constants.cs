@@ -12,17 +12,8 @@ namespace KinectProject.Constants
         public const float DistanceToRect = 80;
         #endregion
 
-        #region Wyœwietlanie
-        public const bool ShowPointsOutsideBox = false;
-        #endregion
 
 
-        #region Kamera i jej sterowanie
-
-        public static readonly Vector3 DefaultEyePosition = new Vector3(0, 0, 0);
-        public static readonly Vector3 DefaultTargetPosition = new Vector3(0f, 0f, DistanceToRect + HalfRectDepth);
-        public static readonly Vector3 DefaultUpVetor = new Vector3(0f, 1f, 0f);
-        #endregion
 
         #region Poboczne
         public const float HalfRectWidth = RectWidth / 2;
