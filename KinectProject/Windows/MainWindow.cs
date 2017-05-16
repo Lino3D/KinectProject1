@@ -22,14 +22,17 @@ namespace KinectProject.Windows
         protected Vector3 CameraAt = new Vector3(0f, 0f, 140f);
         protected Vector3 Up = new Vector3(0f, 1f, 0f);
 
-        private const float RotateAngleStep = 0.01f;
-        private WindowStatus status = WindowStatus.ScanDataStage;
-        public const double KinectFocalLength = 0.00173667;
 
-        private double _phi = Math.PI / 8;
+        private WindowStatus status = WindowStatus.ScanDataStage;
+        public const double focal    = 0.00176248;
+
+
+        private const float RotateAngleStep = 0.01f;
+        private double RotationAngleX = Math.PI;
+        private double RotationAngleY = Math.PI / 8;
         protected Matrix4 Projection;
         private double _radius = 160;
-        private double _theta = Math.PI;
+        
         private bool _mouseCaptured;
         private int _prevX;
         private int _prevY;
@@ -92,8 +95,8 @@ namespace KinectProject.Windows
                 return;
             var dx = e.X - _prevX;
             var dy = e.Y - _prevY;
-            _theta += -dx * RotateAngleStep;
-            _phi += dy * RotateAngleStep;
+            RotationAngleX += -dx * RotateAngleStep;
+            RotationAngleY += dy * RotateAngleStep;
             _prevX = e.X;
             _prevY = e.Y;
         }
@@ -272,57 +275,78 @@ namespace KinectProject.Windows
             {
                 for (var x = 0; x < _kinectDepthImageWidth; x++)
                 {
+                    // Bierzemy odpowiedni pixel poprzez offset
                     var offset = x + y * _kinectDepthImageWidth;
                     var rawDepth = _depthPixels[offset].Depth;
-                    if (Math.Abs(rawDepth) < 0.001) continue;
 
-                    var newX = (int)((x - 320) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfRectWidth);
-                    var newY = (int)((-y + 240) * KinectFocalLength * rawDepth / 10 + Constants.Constants.HalfRectWidth);
-                    double newZ = rawDepth / 10 - Constants.Constants.DistanceToRect;
+                    // Odrzucamy jezeli sie nie nadaje
+                    if (Math.Abs(rawDepth) < 0) continue;
+
+                    // Normalizujemy na nasze wspolrzedne
+                    var depthx = (int)((x - 320) * focal * rawDepth / 10 + 60);
+                    var depthy = (int)((-y + 240) * focal * rawDepth / 10 + 60);
+                    double depthz = rawDepth / 10 - 120;
 
                     var cp = new DrawablePoint3D()
                     {
-                        X = newX,
-                        Y = newY,
-                        Z = newZ,
+                        X = depthx,
+                        Y = depthy,
+                        Z = depthz,
                         DrawFlag = true
                     };
                     depthPoints.Add(cp);
-
-                    UpdateDepthMapByPoint(depthMap, newX, newY, newZ);
+                    
+                    // Dodajemy do naszej mapy glebokosci w odpowiedni sposob   
+                    HandleDepthMap(depthMap, depthx, depthy, depthz);
                 }
             }
             _depthPoints = depthPoints;
             _depthMap = depthMap;
 
-            // Update camera parameters
-            Eye.X = (float)(CameraAt.X + _radius * Math.Cos(_phi) * Math.Sin(_theta));
-            Eye.Z = (float)(CameraAt.Z + _radius * Math.Cos(_theta));
-            Eye.Y = (float)(CameraAt.Y + _radius * Math.Sin(_phi));
+            UpdateCamera();
         }
 
-        private void UpdateDepthMapByPoint(double[,] newDepthMap, int newX, int newY, double newZ)
+        private void UpdateCamera()
         {
-            if (Helpers.Helpers.InRectNoDepth(newX, newY))
-            {
-                if (newZ > Constants.Constants.DistanceToRect + Constants.Constants.RectDepth)
-                    newDepthMap[newX, newY] = Constants.Constants.RectDepth;
+            // Update camera parameters
+            Eye.X = (float)(CameraAt.X + _radius * Math.Cos(RotationAngleY) * Math.Sin(RotationAngleX));
+            Eye.Z = (float)(CameraAt.Z + _radius * Math.Cos(RotationAngleX));
+            Eye.Y = (float)(CameraAt.Y + _radius * Math.Sin(RotationAngleY));
+        }
 
-                if (newZ < Constants.Constants.DistanceToRect)
-                    newDepthMap[newX, newY] = 0;
-            }
-            else if (!Helpers.Helpers.InRectDepth(newX, newY, newZ))
+        private void HandleDepthMap(double[,] newDepthMap, int x, int y, double z)
+        {
+            if (Helpers.Helpers.InRectNoDepth(x, y))
             {
+                // Oznaczamy jako puste
+
+                // 80 - distance to rect, 120 - rect depth
+                // 80 + 120 means that it is behind the rect
+                // if true, then set to rect depth
+                if (z > 200)
+                    newDepthMap[x, y] = 120;
+
+                // If it is before the rect, set it to 0
+                if (z < 80)
+                    newDepthMap[x, y] = 0;
+            }
+            else if (!Helpers.Helpers.InRectDepth(x, y, z))
+            {
+                // If it is out of our depth rect return
                 return;
             }
-            if (newDepthMap[newX, newY] <= 0.001 || newDepthMap[newX, newY] >= (Constants.Constants.RectDepth)) //- 0.001))
+            
+
+            if (newDepthMap[x, y] <= 0 || newDepthMap[x, y] >= 120) 
             {
-                newDepthMap[newX, newY] = newZ;
+                newDepthMap[x, y] = z;
             }
             else
             {
-                newDepthMap[newX, newY] += newZ;
-                newDepthMap[newX, newY] /= 2;
+                var depth = newDepthMap[x, y];
+                depth += 2;
+                depth = depth / 2;
+                newDepthMap[x, y] = depth;
             }
         }
 
